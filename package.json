@@ -1,0 +1,15 @@
+{
+  "name": "klick-express",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Klick backend in express",
+  "main": "app/server.js",
+  "scripts": {
+    "start:dev": "node ."
+  },
+  "author": "brayn003@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
