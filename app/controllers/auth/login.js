@@ -14,7 +14,7 @@ async function controller(req, res) {
     const token = await User.authenticate(email, password);
     return res.json({ token });
   } catch (e) {
-    return res.status(401).json({ message: e instanceof Error ? e.toString() : e });
+    return res.status(401).json({ messages: [e instanceof Error ? e.toString() : e] });
   }
 }
 
