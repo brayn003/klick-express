@@ -11,6 +11,7 @@ async function controller(req, res) {
   const { email } = req.body;
   try {
     const invite = await Invite.create({ email });
+    invite.mailInvite();
     return res.status(201).json(invite.toJSON());
   } catch (e) {
     return res.status(400).json({ messages: [e instanceof Error ? e.toString() : e] });

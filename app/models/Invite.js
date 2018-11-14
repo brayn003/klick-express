@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
+
 const { createJWT } = require('../helpers/jwt-service');
+const { mail } = require('../helpers/mail-service');
 
 const InviteSchema = new mongoose.Schema({
   email: {
@@ -7,7 +9,7 @@ const InviteSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  token: {
+  code: {
     type: String,
     required: true,
     unique: true,
@@ -22,13 +24,30 @@ const InviteSchema = new mongoose.Schema({
   validateBeforeSave: false,
 });
 
+InviteSchema.methods.mailInvite = async function mailInvite() {
+  try {
+    await mail({
+      from: 'no-reply@klickconsulting.in',
+      to: { email: this.email },
+      subject: 'Invitation to join - Klick Consulting',
+      templateId: 'd-2af391c403a6428ea3541123f4cfee34',
+      dynamic_template_data: {
+        url: `https://klickconsulting.in/${this.code}`,
+      },
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 InviteSchema.pre('save', async function (next) {
   const email = await this.constructor.findOne({ email: this.email });
   if (email) {
     throw new Error('Email already exists');
   }
-  const token = await createJWT({ details: { email: this.email } }, process.env.INVITE_SECRET, { expiresIn: '1d' });
-  this.token = token;
+  const code = await createJWT({ details: { email: this.email } }, process.env.INVITE_SECRET, { expiresIn: '1d' });
+  this.code = code;
   return next();
 });
 
