@@ -33,4 +33,11 @@ UserSchema.statics.authenticate = async function authenticate(email, password) {
   return token;
 };
 
+UserSchema.pre('save', (next) => {
+  if (!this.isModified('password')) {
+    this.password = bcrypt.hashSync(this.password);
+  }
+  return next();
+});
+
 module.exports = mongoose.model('User', UserSchema);

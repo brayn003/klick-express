@@ -1,3 +1,1 @@
-module.exports = async (req, res) => {
-  return res.json({ a: 'hello' });
-}
+module.exports = async (req, res) => res.json({ a: 'hello' });
