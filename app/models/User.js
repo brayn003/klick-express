@@ -18,7 +18,10 @@ const UserSchema = new mongoose.Schema({
   firstName: String,
   lastName: String,
   avatar: String,
-}, { collection: 'user' });
+}, {
+  collection: 'user',
+  timestamps: true,
+});
 
 UserSchema.statics.authenticate = async function authenticate(email, password) {
   const user = await this.findOne({ email }).select('+password');
@@ -29,7 +32,11 @@ UserSchema.statics.authenticate = async function authenticate(email, password) {
   if (!match) {
     throw new Error('Password is incorrect');
   }
-  const token = await createJWT(omit(user.toJSON(), ['password']), process.env.AUTH_SECRET, { expiresIn: '1d' });
+  const token = await createJWT(
+    omit(user.toJSON({ virtuals: true }), ['password']),
+    process.env.AUTH_SECRET,
+    { expiresIn: '1d' },
+  );
   return token;
 };
 

@@ -22,9 +22,17 @@ const InviteSchema = new mongoose.Schema({
 }, {
   collection: 'invite',
   validateBeforeSave: false,
+  userAudits: true,
+  timestamps: true,
 });
 
-InviteSchema.methods.mailInvite = async function mailInvite() {
+InviteSchema.statics.createInvite = async function (email, createdBy = null) {
+  const invite = await this.create({ email, createdBy });
+  // await invite.mailInvite();
+  return invite;
+};
+
+InviteSchema.methods.mailInvite = async function () {
   try {
     await mail({
       from: 'no-reply@klickconsulting.in',
@@ -40,6 +48,7 @@ InviteSchema.methods.mailInvite = async function mailInvite() {
     return false;
   }
 };
+
 
 InviteSchema.pre('save', async function (next) {
   const email = await this.constructor.findOne({ email: this.email });

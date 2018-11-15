@@ -8,10 +8,10 @@ const checks = [
 ];
 
 async function controller(req, res) {
+  const { user } = req;
   const { email } = req.body;
   try {
-    const invite = await Invite.create({ email });
-    await invite.mailInvite();
+    const invite = await Invite.createInvite(email, user.id);
     return res.status(201).json(invite.toJSON());
   } catch (e) {
     return res.status(400).json({ messages: [e instanceof Error ? e.toString() : e] });

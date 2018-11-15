@@ -12,14 +12,18 @@ const AdminSchema = new mongoose.Schema({
     enum: ['superadmin', 'admin'],
     default: ['admin'],
   },
-}, { collection: 'admin' });
+}, {
+  collection: 'admin',
+  timestamps: true,
+  userAudits: true,
+});
 
-AdminSchema.statics.addAdmin = async function (userId) {
+AdminSchema.statics.addAdmin = async function (userId, createdBy = null) {
   const user = await this.model('User').findById(userId);
   if (!user) {
     throw new Error('User does not exist');
   }
-  const admin = await this.create({ user });
+  const admin = await this.create({ user, createdBy });
   return admin.populate('user');
 };
 
