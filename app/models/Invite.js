@@ -28,7 +28,7 @@ const InviteSchema = new mongoose.Schema({
 
 InviteSchema.statics.createInvite = async function (email, createdBy = null) {
   const invite = await this.create({ email, createdBy });
-  // await invite.mailInvite();
+  await invite.mailInvite();
   return invite;
 };
 
