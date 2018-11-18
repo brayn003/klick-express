@@ -1,13 +1,12 @@
-const Admin = require('~models/Admin');
+const { verifyJWT } = require('~helpers/jwt-service');
 
-module.exports = (req, res, next) => {
-  const { user } = req;
-  if (!user) {
-    return res.status(403).json({ messages: ['User is not authenticated'] });
+module.exports = async (req, res, next) => {
+  try {
+    const token = (req.header('Authorization') || '').replace('Token ', '');
+    const user = await verifyJWT(token, process.env.ADMIN_AUTH_SECRET);
+    req.user = user;
+    next();
+  } catch (e) {
+    res.status(400).json({ code: e.name, message: e.message });
   }
-  const admin = Admin.find({ user: user.id });
-  if (!admin) {
-    return res.status(401).json({ messages: ['Not admin'] });
-  }
-  return next();
 };

@@ -1,4 +1,8 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt-nodejs');
+const omit = require('lodash/omit');
+
+const { createJWT } = require('~helpers/jwt-service');
 
 const AdminSchema = new mongoose.Schema({
   user: {
@@ -25,6 +29,31 @@ AdminSchema.statics.addAdmin = async function (userId, createdBy = null) {
   }
   const admin = await this.create({ user, createdBy });
   return admin.populate('user');
+};
+
+AdminSchema.statics.authenticate = async function (email, password) {
+  const user = await this.model('User').findOne({ email }).select('+password');
+  if (!user) {
+    throw new Error('User does not exist 2');
+  }
+
+  const match = bcrypt.compareSync(password, user.password);
+  if (!match) {
+    throw new Error('Password is incorrect');
+  }
+
+  const admin = await this.findOne({ user: user.id });
+  if (!admin) {
+    throw new Error('User is not admin');
+  }
+
+  const token = await createJWT(
+    { ...omit(user.toJSON({ virtuals: true }), ['password']), admin },
+    process.env.ADMIN_AUTH_SECRET,
+    { expiresIn: '1d' },
+  );
+
+  return token;
 };
 
 module.exports = mongoose.model('Admin', AdminSchema);
