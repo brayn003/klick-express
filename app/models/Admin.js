@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate');
 const bcrypt = require('bcrypt-nodejs');
 const omit = require('lodash/omit');
 
@@ -55,5 +56,12 @@ AdminSchema.statics.authenticate = async function (email, password) {
 
   return token;
 };
+
+AdminSchema.statics.getAdmins = async function () {
+  const admins = await this.paginate({}, { sort: { createdAt: -1 }, populate: 'user', lean: true });
+  return admins;
+};
+
+AdminSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('Admin', AdminSchema);

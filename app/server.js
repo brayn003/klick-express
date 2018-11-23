@@ -6,6 +6,8 @@ const mongooseDelete = require('mongoose-delete');
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+
 
 function dbConnect() {
   mongoose.set('useCreateIndex', true);
@@ -37,6 +39,7 @@ async function main() {
   const port = process.env.PORT;
 
   // application level middleware
+  app.use(cors());
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
