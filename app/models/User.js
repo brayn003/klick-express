@@ -45,7 +45,7 @@ UserSchema.statics.getUsers = async function (params) {
   const criteria = {};
   if (email) criteria.email = { $regex: new RegExp(email, 'i') };
   if (name) criteria.name = { $regex: new RegExp(name, 'i') };
-  const user = await this.paginate(criteria);
+  const user = await this.paginate(criteria, { lean: true });
   return user;
 };
 
