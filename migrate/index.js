@@ -2,6 +2,11 @@ require('dotenv').config();
 
 const Umzug = require('umzug');
 const mongodb = require('mongodb');
+const path = require('path');
+
+function migName(file) {
+  return path.basename(file, '.js');
+}
 
 async function initUmzug() {
   const con = await mongodb.connect(process.env.MONGODB_URL, { useNewUrlParser: true });
@@ -11,9 +16,12 @@ async function initUmzug() {
     storage: 'mongodb',
     storageOptions: {
       connection,
-      collectionName: '_migration',
+      collectionName: '_migrations',
     },
     migrations: {
+      params: [
+        connection,
+      ],
       path: 'migrate/migrations',
       pattern: /\.js$/,
     },
@@ -29,9 +37,37 @@ async function initUmzug() {
 
 async function cmdList(umzug) {
   const executed = await umzug.executed();
-  executed.forEach((e) => { console.log(`Executed - ${e.file}`); });
+  executed.forEach((e) => { console.log(`Executed - ${migName(e.file)}`); });
   const pending = await umzug.pending();
-  pending.forEach((p) => { console.log(`Pending - ${p.file}`); });
+  pending.forEach((p) => { console.log(`Pending - ${migName(p.file)}`); });
+}
+
+async function cmdUpNext(umzug) {
+  const pending = await umzug.pending();
+  if (pending.length === 0) {
+    throw new Error('No migrations to execute');
+  } else {
+    const to = migName(pending[0].file);
+    return umzug.up({ to });
+  }
+}
+
+async function cmdUpAll(umzug) {
+  return umzug.up();
+}
+
+async function cmdDownPrev(umzug) {
+  const executed = await umzug.executed();
+  if (executed.length === 0) {
+    throw new Error('No migrations to revert');
+  } else {
+    const to = migName(executed[executed.length - 1].file);
+    return umzug.down({ to });
+  }
+}
+
+async function cmdDownAll(umzug) {
+  return umzug.down({ to: 0 });
 }
 
 async function executeCmd(umzug) {
@@ -40,6 +76,26 @@ async function executeCmd(umzug) {
   switch (cmd) {
     case 'list':
       executedCmd = cmdList(umzug);
+      break;
+
+    case 'up':
+    case 'next':
+      executedCmd = cmdUpNext(umzug);
+      break;
+
+    case '':
+    case 'up-all':
+      executedCmd = cmdUpAll(umzug);
+      break;
+
+    case 'down':
+    case 'prev':
+      executedCmd = cmdDownPrev(umzug);
+      break;
+
+    case 'down-all':
+    case 'revert':
+      executedCmd = cmdDownAll(umzug);
       break;
 
     default:

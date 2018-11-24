@@ -6,7 +6,7 @@
   "main": "app/server.js",
   "scripts": {
     "start:dev": "nodemon .",
-    "migrate": "./migrate/index.js"
+    "migrate": "node ./migrate/index.js"
   },
   "author": "brayn003@gmail.com",
   "license": "ISC",
