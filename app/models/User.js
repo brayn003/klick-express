@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate');
 const bcrypt = require('bcrypt-nodejs');
 const omit = require('lodash/omit');
 
@@ -15,15 +16,14 @@ const UserSchema = new mongoose.Schema({
     required: true,
     select: false,
   },
-  firstName: String,
-  lastName: String,
+  name: String,
   avatar: String,
 }, {
   collection: 'user',
   timestamps: true,
 });
 
-UserSchema.statics.authenticate = async function authenticate(email, password) {
+UserSchema.statics.authenticate = async function (email, password) {
   const user = await this.findOne({ email }).select('+password');
   if (!user) {
     throw new Error('User does not exist');
@@ -40,11 +40,22 @@ UserSchema.statics.authenticate = async function authenticate(email, password) {
   return token;
 };
 
+UserSchema.statics.getUsers = async function (params) {
+  const { email, name } = params;
+  const criteria = {};
+  if (email) criteria.email = { $regex: new RegExp(email, 'i') };
+  if (name) criteria.name = { $regex: new RegExp(name, 'i') };
+  const user = await this.paginate(criteria);
+  return user;
+};
+
 UserSchema.pre('save', (next) => {
   if (!this.isModified('password')) {
     this.password = bcrypt.hashSync(this.password);
   }
   return next();
 });
+
+UserSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('User', UserSchema);
