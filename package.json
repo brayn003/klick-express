@@ -5,7 +5,8 @@
   "description": "Klick backend in express",
   "main": "app/server.js",
   "scripts": {
-    "start:dev": "nodemon ."
+    "start:dev": "nodemon .",
+    "migrate": "./migrate/index.js"
   },
   "author": "brayn003@gmail.com",
   "license": "ISC",
@@ -20,9 +21,11 @@
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.17.11",
     "module-alias": "^2.1.0",
+    "mongodb": "^3.1.10",
     "mongoose": "^5.3.11",
     "mongoose-delete": "^0.4.0",
-    "mongoose-paginate": "^5.0.3"
+    "mongoose-paginate": "^5.0.3",
+    "umzug": "^2.2.0"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.1",
