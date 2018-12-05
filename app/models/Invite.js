@@ -35,12 +35,12 @@ InviteSchema.statics.createInvite = async function (email, createdBy = null) {
 InviteSchema.methods.mailInvite = async function () {
   try {
     await mail({
-      from: 'no-reply@klickconsulting.in',
+      from: process.env.EMAIL_NOREPLY,
       to: { email: this.email },
       subject: 'Invitation to join - Klick Consulting',
-      templateId: 'd-2af391c403a6428ea3541123f4cfee34',
+      templateId: process.env.INVITE_SENDGRID_TEMPLATE,
       dynamic_template_data: {
-        url: `https://klickconsulting.in/${this.code}`,
+        url: process.env.APP_URL + this.code,
       },
     });
     return true;
