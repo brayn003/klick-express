@@ -18,4 +18,4 @@ async function controller(req, res) {
   }
 }
 
-module.exports = validateParams(checks, controller);
+module.exports = [validateParams(checks), controller];

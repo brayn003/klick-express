@@ -17,4 +17,4 @@ async function controller(req, res) {
     return res.status(401).json({ messages: [e instanceof Error ? e.toString() : e] });
   }
 }
-module.exports = validateParams(checks, controller);
+module.exports = [validateParams(checks), controller];
