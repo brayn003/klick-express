@@ -49,6 +49,14 @@ InviteSchema.methods.mailInvite = async function () {
   }
 };
 
+InviteSchema.statics.useInvite = async function (email, code) {
+  const invite = await this.findOne({ email, code });
+  if (!invite || invite.used) {
+    throw new Error('Invite does not exist');
+  }
+  await invite.updateOne({ used: true });
+  return true;
+};
 
 InviteSchema.pre('save', async function (next) {
   const email = await this.constructor.findOne({ email: this.email });

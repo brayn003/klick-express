@@ -21,6 +21,7 @@ const UserSchema = new mongoose.Schema({
 }, {
   collection: 'user',
   timestamps: true,
+  userAudits: true,
 });
 
 UserSchema.statics.authenticate = async function (email, password) {
@@ -49,10 +50,18 @@ UserSchema.statics.getUsers = async function (params) {
   return user;
 };
 
-UserSchema.pre('save', (next) => {
-  if (!this.isModified('password')) {
-    this.password = bcrypt.hashSync(this.password);
+UserSchema.statics.createUser = async function (params) {
+  const { email, name, password } = params;
+  const user = await this.create({ email, name, password });
+  return omit(user.toJSON({ virtuals: true }), ['password']);
+};
+
+UserSchema.pre('save', async function (next) {
+  const user = await this.constructor.findOne({ email: this.email });
+  if (user) {
+    throw new Error('User already exists');
   }
+  this.password = bcrypt.hashSync(this.password);
   return next();
 });
 
