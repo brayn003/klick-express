@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate');
 
-const organizationSchema = new mongoose.Schema({
+const OrganizationSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -108,21 +109,35 @@ const organizationSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-
 }, {
   collection: 'organization',
   timestamps: true,
   userAudits: true,
 });
 
-organizationSchema.statics.createOrganization = async function (params, createdBy) {
+OrganizationSchema.statics.createOrganization = async function (params, createdBy) {
   const organization = await this.create({ ...params, createdBy });
   return organization.toJSON({ virtuals: true });
 };
 
-organizationSchema.pre('save', async function (next) {
+OrganizationSchema.statics.getAll = async function (params) {
+  const { name, user } = params;
+  const criteria = {};
+  if (name) criteria.name = { $regex: new RegExp(name, 'i') };
+  if (user) {
+    const roles = await this.model('OrganizationUser').find({ user });
+    const organizationIds = roles.map(c => mongoose.Types.ObjectId(c.organization));
+    criteria._id = { $in: organizationIds };
+  }
+  const organizations = await this.paginate(criteria, { lean: true });
+  return organizations;
+};
+
+OrganizationSchema.pre('save', async function (next) {
   this.invoiceSerialPrefix = this.name.substring(0, 3).toUpperCase();
   return next();
 });
 
-module.exports = mongoose.model('Organization', organizationSchema);
+OrganizationSchema.plugin(mongoosePaginate);
+
+module.exports = mongoose.model('Organization', OrganizationSchema);

@@ -14,6 +14,7 @@ function dbConnect() {
   mongoose.plugin(mongooseDelete, {
     overrideMethods: true,
     deletedAt: true,
+    deletedBy: true,
   });
   mongoose.plugin((schema) => {
     if (schema.options.userAudits) {
