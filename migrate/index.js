@@ -3,6 +3,7 @@ require('dotenv').config();
 const Umzug = require('umzug');
 const mongodb = require('mongodb');
 const path = require('path');
+const chalk = require('chalk');
 
 function migName(file) {
   return path.basename(file, '.js');
@@ -37,9 +38,9 @@ async function initUmzug() {
 
 async function cmdList(umzug) {
   const executed = await umzug.executed();
-  executed.forEach((e) => { console.log(`Executed - ${migName(e.file)}`); });
+  executed.forEach((e) => { console.log(chalk.green(`Executed - ${migName(e.file)}`)); });
   const pending = await umzug.pending();
-  pending.forEach((p) => { console.log(`Pending - ${migName(p.file)}`); });
+  pending.forEach((p) => { console.log(chalk.yellow(`Pending - ${migName(p.file)}`)); });
 }
 
 async function cmdUpNext(umzug) {
@@ -105,10 +106,10 @@ async function executeCmd(umzug) {
 
   try {
     await executedCmd;
-    console.log('-- Done --');
+    console.log(chalk.bold`-- Done --`);
   } catch (err) {
-    console.log('-- Error --');
-    console.error(err);
+    console.log(chalk.error`-- Error --`);
+    console.error(chalk.error(err));
   }
 }
 

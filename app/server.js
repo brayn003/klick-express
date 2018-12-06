@@ -7,7 +7,7 @@ const mongooseDelete = require('mongoose-delete');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-
+const chalk = require('chalk');
 
 function dbConnect() {
   mongoose.set('useCreateIndex', true);
@@ -48,7 +48,7 @@ async function main() {
   app.use('/', require('./routes'));
 
   // app launch
-  app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+  app.listen(port, () => console.log(chalk`{green Example app listening on port {bold ${port}}!}`));
 }
 
 main();
