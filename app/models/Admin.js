@@ -35,7 +35,7 @@ AdminSchema.statics.addAdmin = async function (userId, createdBy = null) {
 AdminSchema.statics.authenticate = async function (email, password) {
   const user = await this.model('User').findOne({ email }).select('+password');
   if (!user) {
-    throw new Error('User does not exist 2');
+    throw new Error('User does not exist');
   }
 
   const match = bcrypt.compareSync(password, user.password);
