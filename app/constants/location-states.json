@@ -1,0 +1,182 @@
+{
+  "AN": {
+    "name": "Andaman and Nicobar Islands",
+    "tin": "35",
+    "code": "AN"
+  },
+  "AD": {
+    "name": "Andhra Pradesh",
+    "tin": "37",
+    "code": "AD"
+  },
+  "AR": {
+    "name": "Arunachal Pradesh",
+    "tin": "12",
+    "code": "AR"
+  },
+  "AS": {
+    "name": "Assam",
+    "tin": "18",
+    "code": "AS"
+  },
+  "BR": {
+    "name": "Bihar",
+    "tin": "10",
+    "code": "BR"
+  },
+  "CH": {
+    "name": "Chandigarh",
+    "tin": "04",
+    "code": "CH"
+  },
+  "CG": {
+    "name": "Chattisgarh",
+    "tin": "22",
+    "code": "CG"
+  },
+  "DN": {
+    "name": "Dadra and Nagar Haveli",
+    "tin": "26",
+    "code": "DN"
+  },
+  "DD": {
+    "name": "Daman and Diu",
+    "tin": "25",
+    "code": "DD"
+  },
+  "DL": {
+    "name": "Delhi",
+    "tin": "07",
+    "code": "DL"
+  },
+  "GA": {
+    "name": "Goa",
+    "tin": "30",
+    "code": "GA"
+  },
+  "GJ": {
+    "name": "Gujarat",
+    "tin": "24",
+    "code": "GJ"
+  },
+  "HR": {
+    "name": "Haryana",
+    "tin": "06",
+    "code": "HR"
+  },
+  "HP": {
+    "name": "Himachal Pradesh",
+    "tin": "02",
+    "code": "HP"
+  },
+  "JK": {
+    "name": "Jammu and Kashmir",
+    "tin": "01",
+    "code": "JK"
+  },
+  "JH": {
+    "name": "Jharkhand",
+    "tin": "20",
+    "code": "JH"
+  },
+  "KA": {
+    "name": "Karnataka",
+    "tin": "29",
+    "code": "KA"
+  },
+  "KL": {
+    "name": "Kerala",
+    "tin": "32",
+    "code": "KL"
+  },
+  "LD": {
+    "name": "Lakshadweep Islands",
+    "tin": "31",
+    "code": "LD"
+  },
+  "MP": {
+    "name": "Madhya Pradesh",
+    "tin": "23",
+    "code": "MP"
+  },
+  "MH": {
+    "name": "Maharashtra",
+    "tin": "27",
+    "code": "MH"
+  },
+  "MN": {
+    "name": "Manipur",
+    "tin": "14",
+    "code": "MN"
+  },
+  "ML": {
+    "name": "Meghalaya",
+    "tin": "17",
+    "code": "ML"
+  },
+  "MZ": {
+    "name": "Mizoram",
+    "tin": "15",
+    "code": "MZ"
+  },
+  "NL": {
+    "name": "Nagaland",
+    "tin": "13",
+    "code": "NL"
+  },
+  "OD": {
+    "name": "Odisha",
+    "tin": "21",
+    "code": "OD"
+  },
+  "PY": {
+    "name": "Pondicherry",
+    "tin": "34",
+    "code": "PY"
+  },
+  "PB": {
+    "name": "Punjab",
+    "tin": "03",
+    "code": "PB"
+  },
+  "RJ": {
+    "name": "Rajasthan",
+    "tin": "08",
+    "code": "RJ"
+  },
+  "SK": {
+    "name": "Sikkim",
+    "tin": "11",
+    "code": "SK"
+  },
+  "TN": {
+    "name": "Tamil Nadu",
+    "tin": "33",
+    "code": "TN"
+  },
+  "TS": {
+    "name": "Telangana",
+    "tin": "36",
+    "code": "TS"
+  },
+  "TR": {
+    "name": "Tripura",
+    "tin": "16",
+    "code": "TR"
+  },
+  "UP": {
+    "name": "Uttar Pradesh",
+    "tin": "09",
+    "code": "UP"
+  },
+  "UK": {
+    "name": "Uttarakhand",
+    "tin": "05",
+    "code": "UK"
+  },
+  "WB": {
+    "name": "West Bengal",
+    "tin": "19",
+    "code": "WB"
+  }
+}

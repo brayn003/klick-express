@@ -41,6 +41,7 @@
     "~helpers": "app/helpers",
     "~middlewares": "app/middlewares",
     "~models": "app/models",
-    "~routes": "app/routes"
+    "~routes": "app/routes",
+    "~constants": "app/constants"
   }
 }

@@ -7,7 +7,7 @@ const { createJWT } = require('~helpers/jwt-service');
 
 const AdminSchema = new mongoose.Schema({
   user: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: 'ObjectId',
     ref: 'User',
     required: true,
     unique: true,

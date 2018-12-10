@@ -1,5 +1,5 @@
 const Organization = require('~models/Organization');
-const OrganizationUser = require('~models/OrganizationUser');
+const OrganizationUser = require('~models/Organization/User');
 
 const { transformError } = require('~/helpers/error-handlers');
 
