@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 
 const organizationUserSchema = new mongoose.Schema({
-  organization: { type: 'ObjectId', ref: 'Organization' },
-  user: { type: 'ObjectId', ref: 'User' },
+  organization: { type: 'ObjectId', ref: 'Organization', required: true },
+  user: { type: 'ObjectId', ref: 'User', required: true },
   role: { type: String, enum: ['owner', 'admin', 'member'], default: 'member' },
-  level: { type: String, enum: ['branch', 'organization'] },
+  level: { type: String, enum: ['branch', 'organization'], default: 'organization' },
   branch: { type: 'ObjectId', ref: 'OrganizationBranch' },
+  signingAuthority: { type: Boolean, default: false },
 }, {
   collection: 'organization_user',
   timestamps: true,

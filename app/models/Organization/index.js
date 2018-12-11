@@ -7,12 +7,9 @@ const OrganizationSchema = new mongoose.Schema({
   phone: { type: String, default: '' },
   email: { type: String, default: '' },
   logo: { type: String, default: '' },
-  slug: {
+  code: {
     type: String, minlength: 2, maxlength: 4, required: true,
   },
-
-  branches: [{ type: 'ObjectId', ref: 'OrganizationBranch' }],
-  bankDetails: [{ type: 'ObjectId', ref: 'OrganizationBankDetails' }],
 
   industryType: { type: String, enum: ['product-based', 'service-based'], default: 'product-based' },
   isComposition: { type: Boolean, default: false },
