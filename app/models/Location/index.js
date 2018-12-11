@@ -5,7 +5,7 @@ const LocationSchema = new mongoose.Schema({
   key: { type: String, required: true },
   type: { type: String, enum: ['state', 'city'] },
 }, {
-  collation: 'location',
+  collection: 'location',
   userAudits: true,
   timestamps: true,
   discriminatorKey: 'type',

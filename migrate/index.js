@@ -108,8 +108,8 @@ async function executeCmd(umzug) {
     await executedCmd;
     console.log(chalk.bold`-- Done --`);
   } catch (err) {
-    console.log(chalk.error`-- Error --`);
-    console.error(chalk.error(err));
+    console.log(chalk.red`-- Error --`);
+    console.error(chalk.red(err));
   }
 }
 
