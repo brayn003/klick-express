@@ -8,6 +8,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const chalk = require('chalk');
+const { argv } = require('yargs');
+const repl = require('repl');
 
 function dbConnect() {
   mongoose.set('useCreateIndex', true);
@@ -48,7 +50,11 @@ async function main() {
   app.use('/', require('./routes'));
 
   // app launch
-  app.listen(port, () => console.log(chalk`{green Example app listening on port {bold ${port}}!}`));
+  if (argv.repl) {
+    repl.start('> ');
+  } else {
+    app.listen(port, () => console.log(chalk`{green Example app listening on port {bold ${port}}!}`));
+  }
 }
 
 main();

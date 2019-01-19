@@ -12,7 +12,7 @@ const OrganizationSchema = new mongoose.Schema({
   },
 
   industryType: { type: String, enum: ['product-based', 'service-based'], default: 'product-based' },
-  isComposition: { type: Boolean, default: false },
+  isUnderComposition: { type: Boolean, default: false },
 
   invoicePreferences: {
     autoSerial: { type: Boolean, default: false },
