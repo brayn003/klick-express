@@ -111,7 +111,7 @@ InvoiceSchema.statics.createInvoice = async function ({
     isSameState,
     taxInclusion: 'inclusive',
   });
-  invoice.getTaxes();
+  console.log(invoice.getRoundedTotal());
 };
 
 module.exports = mongoose.model('Invoice', InvoiceSchema);

@@ -37,7 +37,6 @@ class InvoiceService {
   }
 
   getParticularTaxes(particular) {
-    // this.validateTaxes(particular.taxTypes);
     const taxableAmount = this.getParticularTaxableAmount(particular);
     return particular.taxTypes
       .map(taxType => ({ taxType, amount: +((taxType.rate / 100) * taxableAmount).toFixed(2) }));
@@ -58,6 +57,22 @@ class InvoiceService {
       }, agg);
     }, {});
     return Object.values(taxesMap);
+  }
+
+  getTaxableAmount() {
+    return sumBy(this.particulars, this.getParticularTaxableAmount);
+  }
+
+  getTaxAmount() {
+    return sumBy(this.getTaxes(), 'amount');
+  }
+
+  getTotal() {
+    return this.getTaxableAmount() + this.getTaxAmount();
+  }
+
+  getRoundedTotal() {
+    return Math.round(this.getTotal());
   }
 }
 
