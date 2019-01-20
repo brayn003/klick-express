@@ -32,7 +32,7 @@ function dbConnect() {
       });
     }
   });
-  return mongoose.connect('mongodb://localhost:27017/klickApp', { useNewUrlParser: true });
+  return mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true });
 }
 
 async function main() {
@@ -49,12 +49,17 @@ async function main() {
   // routes
   app.use('/', require('./routes'));
 
+  require('~models/Invoice').createInvoice({});
+  // console.log(w);
+
+
   // app launch
-  if (argv.repl) {
-    repl.start('> ');
-  } else {
-    app.listen(port, () => console.log(chalk`{green Example app listening on port {bold ${port}}!}`));
-  }
+  // if (argv.repl) {
+  //   const replInstance = repl.start('> ');
+  //   replInstance.context.mongoose = mongoose;
+  // } else {
+  //   app.listen(port, () => console.log(chalk`{green Example app listening on port {bold ${port}}!}`));
+  // }
 }
 
 main();

@@ -1,11 +1,7 @@
-const isNil = require('lodash/isNil');
-const { sumBy } = require('helpers/math-service');
+// const TaxType = require('~models/TaxType');
+const sumBy = require('lodash/sumBy');
 
-// function calculateDiscount(total, discountValue, discountType = 'rate') {
-//   if()
-// }
-
-export default class InvoiceService {
+class InvoiceService {
   constructor({
     particulars = [],
     isTaxable,
@@ -16,47 +12,53 @@ export default class InvoiceService {
     this.isTaxable = isTaxable;
     this.isSameState = isSameState;
     this.taxInclusion = taxInclusion;
+
+    // method bindings
+    this.getParticularTaxableAmount = this.getParticularTaxableAmount.bind(this);
+    this.getParticularTaxes = this.getParticularTaxes.bind(this);
   }
 
-  getParticularAmount(particular) {
+  getParticularTaxableAmount(particular) {
     if (!this.isTaxable) {
-      return particular.rate * particular.quantity;
+      return +(particular.rate * particular.quantity).toFixed(2);
     }
 
     if (this.isTaxable && this.taxInclusion === 'exclusive') {
-      return particular.rate * particular.quantity;
+      return +(particular.rate * particular.quantity).toFixed(2);
     }
 
     if (this.isTaxable && this.taxInclusion === 'inclusive') {
-      const {
-        taxRate, discountRate, discountAmount, rate, quantity,
-      } = particular;
-      const grandTotal = quantity * rate;
-      if (isNil(discountAmount)) {
-        return (grandTotal * 10000) / ((100 + taxRate) * (100 - discountRate));
-      }
-      return ((grandTotal * 100) / (100 + taxRate)) * discountAmount;
+      const total = particular.quantity * particular.rate;
+      const taxRate = sumBy(particular.taxTypes, 'rate');
+      return +((total * 100) / (taxRate + 100)).toFixed(2);
     }
 
     return null;
   }
 
-  getParticularDiscountAmount(particular) {
-    const { discountRate, discountAmount } = particular;
-    const taxableAmount = this.getDiscountAmount(particular);
-    if (isNil(discountAmount)) {
-      return (discountRate / 100) * taxableAmount;
-    }
-    return discountAmount;
+  getParticularTaxes(particular) {
+    // this.validateTaxes(particular.taxTypes);
+    const taxableAmount = this.getParticularTaxableAmount(particular);
+    return particular.taxTypes
+      .map(taxType => ({ taxType, amount: +((taxType.rate / 100) * taxableAmount).toFixed(2) }));
   }
 
-  getAmount() {
-    return sumBy(this.particulars, this.getParticularAmount);
-  }
-
-  getDiscountAmount() {
-    if (!this.isTaxable) {
-
-    }
+  getTaxes() {
+    const taxesMap = this.particulars.reduce((agg, particular) => {
+      const particularTaxes = this.getParticularTaxes(particular);
+      return particularTaxes.reduce((agg2, particularTax) => {
+        const agg3 = agg2;
+        const key = `${particularTax.taxType.type}`;
+        if (typeof agg2[key] === 'undefined') {
+          agg3[key] = particularTax;
+        } else {
+          agg3[key].amount = +(agg3[key].amount + particularTax.amount).toFixed(2);
+        }
+        return agg3;
+      }, agg);
+    }, {});
+    return Object.values(taxesMap);
   }
 }
+
+module.exports = InvoiceService;

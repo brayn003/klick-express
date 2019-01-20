@@ -1,4 +1,4 @@
-import Decimal from 'decimal.js';
+const Decimal = require('decimal.js');
 // import get from 'lodash/get';
 
 function sumBy(collection, iterator) {
@@ -8,6 +8,12 @@ function sumBy(collection, iterator) {
   }, new Decimal(0)).valueOf();
 }
 
+function toDecimalPlaces(num, decimalPlaces = 2) {
+  return new Decimal(num).toDP(decimalPlaces);
+}
+
 module.exports = {
   sumBy,
+  toDecimalPlaces,
+  toDP: toDecimalPlaces,
 };
