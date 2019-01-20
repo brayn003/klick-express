@@ -1,5 +1,7 @@
 // const TaxType = require('~models/TaxType');
 const sumBy = require('lodash/sumBy');
+const isNil = require('lodash/isNil');
+
 
 class InvoiceService {
   constructor({
@@ -14,26 +16,79 @@ class InvoiceService {
     this.taxInclusion = taxInclusion;
 
     // method bindings
+    this.getParticularDiscountAmount = this.getParticularDiscountAmount.bind(this);
+    this.getParticularAmount = this.getParticularAmount.bind(this);
     this.getParticularTaxableAmount = this.getParticularTaxableAmount.bind(this);
     this.getParticularTaxes = this.getParticularTaxes.bind(this);
+    this.getParticularTaxAmount = this.getParticularTaxAmount.bind(this);
+    this.getParticularTotal = this.getParticularTotal.bind(this);
   }
 
-  getParticularTaxableAmount(particular) {
+  getParticularDiscountAmount(particular) {
+    let { discountAmount } = particular;
+
+    if (isNil(particular.discountAmount) && !isNil(particular.discountRate)) {
+      discountAmount = +(
+        (particular.rate * particular.quantity)
+        * (particular.discountRate / 100)
+      ).toFixed(2);
+    }
+
+    if (isNil(particular.discountAmount) && isNil(particular.discountRate)) {
+      discountAmount = 0;
+    }
+
+    if (this.taxInclusion === 'exclusive') {
+      return discountAmount;
+    }
+
+    if (this.taxInclusion === 'inclusive') {
+      const taxRate = sumBy(particular.taxTypes, 'rate');
+      return +((discountAmount * 100) / (100 + taxRate)).toFixed(2);
+    }
+
+    return 0;
+  }
+
+  getParticularDiscountRate(particular) {
+    return +(
+      (this.discountAmount(particular) * 100)
+      / this.getTaxableAmount(particular)
+    ).toFixed(2);
+  }
+
+  getParticularAmount(particular) {
+    const discountAmount = this.getParticularDiscountAmount(particular);
+
     if (!this.isTaxable) {
-      return +(particular.rate * particular.quantity).toFixed(2);
+      return +((particular.rate * particular.quantity) + discountAmount).toFixed(2);
     }
 
     if (this.isTaxable && this.taxInclusion === 'exclusive') {
-      return +(particular.rate * particular.quantity).toFixed(2);
+      return +((particular.rate * particular.quantity) + discountAmount).toFixed(2);
     }
 
     if (this.isTaxable && this.taxInclusion === 'inclusive') {
-      const total = particular.quantity * particular.rate;
+      const total = (particular.quantity * particular.rate);
       const taxRate = sumBy(particular.taxTypes, 'rate');
-      return +((total * 100) / (taxRate + 100)).toFixed(2);
+      const taxableAmount = (total * 100) / (taxRate + 100);
+      return +(taxableAmount + discountAmount).toFixed(2);
     }
 
     return null;
+  }
+
+  getParticularTaxableAmount(particular) {
+    return (this.getParticularAmount(particular) - this.getParticularDiscountAmount(particular));
+  }
+
+  getParticularTaxAmount(particular) {
+    const taxRate = sumBy(particular.taxTypes, 'rate');
+    return +(this.getParticularTaxableAmount(particular) * (taxRate / 100)).toFixed(2);
+  }
+
+  getParticularTotal(particular) {
+    return +(this.getParticularTaxableAmount(particular) + this.getParticularTaxAmount(particular));
   }
 
   getParticularTaxes(particular) {
@@ -59,20 +114,60 @@ class InvoiceService {
     return Object.values(taxesMap);
   }
 
+  getTdsAmount() {
+    if (!isNil(this.tdsAmount)) {
+      return +(this.tdsAmount).toFixed();
+    }
+
+    if (isNil(this.tdsAmount) && !isNil(this.tdsRate)) {
+      return +(this.getTotal() * (this.tdsRate / 100)).toFixed(2);
+    }
+
+    return 0;
+  }
+
+  getTdsRate() {
+    if (!isNil(this.tdsAmount)) {
+      return +((this.tdsAmount * 100) / this.getTotal()).toFixed(2);
+    }
+
+    if (isNil(this.tdsAmount) && !isNil(this.tdsRate)) {
+      return +(this.tdsRate).toFixed(2);
+    }
+
+    return 0;
+  }
+
+  getAmount() {
+    return +sumBy(this.particulars, this.getParticularAmount).toFixed(2);
+  }
+
+  getDiscountAmount() {
+    return +sumBy(this.particulars, this.getParticularDiscountAmount).toFixed(2);
+  }
+
   getTaxableAmount() {
-    return sumBy(this.particulars, this.getParticularTaxableAmount);
+    return +sumBy(this.particulars, this.getParticularTaxableAmount).toFixed(2);
   }
 
   getTaxAmount() {
-    return sumBy(this.getTaxes(), 'amount');
+    return +sumBy(this.particulars, this.getParticularTaxAmount).toFixed(2);
   }
 
   getTotal() {
-    return this.getTaxableAmount() + this.getTaxAmount();
+    return +sumBy(this.particulars, this.getParticularTotal).toFixed(2);
   }
 
   getRoundedTotal() {
     return Math.round(this.getTotal());
+  }
+
+  getAmountReceivable() {
+    return +(this.getTotal() - this.getTdsAmount()).toFixed(2);
+  }
+
+  getRoundedAmountReceivable() {
+    return Math.round(this.getAmountReceivable());
   }
 }
 

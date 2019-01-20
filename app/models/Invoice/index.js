@@ -42,15 +42,12 @@ const InvoiceSchema = new mongoose.Schema({
       amount: { type: Number, required: true },
     }],
 
-    // amount received as is
-    billAmount: { type: Number, required: true },
-
     // amount before discount and tax
-    amount: { type: Number, required: true },
-
+    // amount: { type: Number, required: true },
+    taxAmount: { type: Number, required: true },
     // amount after discounts commissions, on which tax needs to applied
-    taxableAmount: { type: Number, required: 0 },
-    total: { type: Number, required: 0 },
+    taxableAmount: { type: Number, required: true },
+    total: { type: Number, required: true },
   }],
 
   taxes: [{
@@ -59,12 +56,11 @@ const InvoiceSchema = new mongoose.Schema({
   }],
 
   // amount received as is
-  billAmount: { type: Number, required: true },
+  // total amount of tax
+  taxAmount: { type: Number, required: true },
 
   // amount after discounts commissions, on which tax needs to applied
   taxableAmount: { type: Number, required: true },
-
-  // amount after discount and tax
   total: { type: Number, required: true },
   roundedTotal: { type: Number, required: true },
 
@@ -77,10 +73,7 @@ const InvoiceSchema = new mongoose.Schema({
 const particularsSeed = [{
   rate: 100,
   quantity: 1,
-  taxTypes: ['5c43969be05315f9d3a67b09', '5c43969be05315f9d3a67b0e'],
-}, {
-  rate: 1000,
-  quantity: 1,
+  discountAmount: 10,
   taxTypes: ['5c43969be05315f9d3a67b09', '5c43969be05315f9d3a67b0e'],
 }];
 
@@ -111,7 +104,12 @@ InvoiceSchema.statics.createInvoice = async function ({
     isSameState,
     taxInclusion: 'inclusive',
   });
-  console.log(invoice.getRoundedTotal());
+  console.log('particulars -> ', invoice.particulars);
+  console.log('Amount ->         ', invoice.getAmount());
+  console.log('DiscountAmount -> ', -invoice.getDiscountAmount());
+  console.log('TaxableAmount ->  ', invoice.getTaxableAmount());
+  console.log('Tax Amount ->     ', -invoice.getTaxAmount());
+  console.log('Grand Total ->    ', invoice.getTotal());
 };
 
 module.exports = mongoose.model('Invoice', InvoiceSchema);
