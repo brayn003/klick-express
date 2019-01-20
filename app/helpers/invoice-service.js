@@ -49,7 +49,7 @@ class InvoiceService {
       return particularTaxes.reduce((agg2, particularTax) => {
         const agg3 = agg2;
         const key = `${particularTax.taxType.type}`;
-        if (typeof agg2[key] === 'undefined') {
+        if (typeof agg3[key] === 'undefined') {
           agg3[key] = particularTax;
         } else {
           agg3[key].amount = +(agg3[key].amount + particularTax.amount).toFixed(2);
