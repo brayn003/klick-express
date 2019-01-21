@@ -3,11 +3,32 @@ const InvoiceService = require('~helpers/invoice-service');
 const { validateParticulars } = require('~helpers/tax-service');
 const TaxType = require('~models/TaxType');
 
+const InvoiceParticularSchema = new mongoose.Schema({
+  details: { type: 'ObjectId', ref: 'InvoiceParticular' },
+  rate: { type: Number, required: true },
+  quantity: { type: Number, required: true },
+
+  discountRate: { type: Number, required: true },
+  discountAmount: { type: Number, required: true },
+
+  taxes: [{
+    taxType: { type: 'ObjectId', ref: 'TaxType' },
+    amount: { type: Number, required: true },
+  }],
+
+  overallTaxRate: { type: Number, required: true },
+  taxAmount: { type: Number, required: true },
+
+  amount: { type: Number, required: true },
+  taxableAmount: { type: Number, required: true },
+  total: { type: Number, required: true },
+});
+
 const InvoiceSchema = new mongoose.Schema({
   // refs
   organization: { type: 'ObjectId', ref: 'Organization', required: true },
   organizationBranch: { type: 'ObjectId', ref: 'OrganizationBranch', required: true },
-  client: { type: 'ObjectId', ref: 'Organization', required: true },
+  client: { type: 'ObjectId', ref: 'Organization' },
   clientBranch: { type: 'ObjectId', ref: 'OrganizationBranch' },
 
   // dates
@@ -17,10 +38,10 @@ const InvoiceSchema = new mongoose.Schema({
   closedDate: { type: Date, default: null },
 
   // semaphore flags
+  // generateSerial: { type: Boolean, required: true },
   isGSTCompliant: { type: Boolean, required: true },
   isUnderComposition: { type: Boolean, default: false },
   isUnderLUT: { type: Boolean, default: false },
-  generateSerial: { type: Boolean, required: true },
   isTaxable: { type: Boolean, required: true },
 
   // properties
@@ -29,28 +50,13 @@ const InvoiceSchema = new mongoose.Schema({
   taxInclusion: { type: String, enum: ['inclusive', 'exclusive'], required: true },
   serial: { type: Boolean, default: null },
   status: { type: String, enum: ['open', 'closed', 'cancelled'], default: 'open' },
-  inlineComment: { type: String, required: true },
+  inlineComment: { type: String },
   attachments: [{ type: String }],
 
-  particulars: [{
-    details: { type: 'ObjectId', ref: 'InvoiceParticular' },
-    rate: { type: Number, required: true },
-    quantity: { type: Number, required: true },
+  particulars: [InvoiceParticularSchema],
 
-    discountRate: { type: Number, required: true },
-    discountAmount: { type: Number, required: true },
-
-    taxes: [{
-      taxType: { type: 'ObjectId', ref: 'TaxType' },
-      amount: { type: Number, required: true },
-    }],
-    overallTaxRate: { type: Number, required: true },
-    taxAmount: { type: Number, required: true },
-
-    amount: { type: Number, required: true },
-    taxableAmount: { type: Number, required: true },
-    total: { type: Number, required: true },
-  }],
+  discountRate: { type: Number, required: true },
+  discountAmount: { type: Number, required: true },
 
   taxes: [{
     taxType: { type: 'ObjectId', ref: 'TaxType' },
@@ -86,26 +92,14 @@ const particularsSeed = [{
   taxTypes: ['5c43969be05315f9d3a67b09', '5c43969be05315f9d3a67b0e'],
 }];
 
-async function getPopulatedParticulars(particulars) {
-  const taxTypesArr = await Promise.all(
-    particulars.map(async (p) => {
-      const taxTypes = await TaxType.find({ _id: { $in: p.taxTypes } });
-      return taxTypes;
-    }),
-  );
-  return particulars.map((p, index) => {
-    const taxTypes = taxTypesArr[index];
-    return { ...p, taxTypes };
-  });
-}
-
-InvoiceSchema.statics.createInvoice = async function ({
-  particulars = particularsSeed,
-  isTaxable = true,
-  isSameState = true,
-  discountAmount = 9,
-}) {
-  const newParticulars = await getPopulatedParticulars(particulars);
+InvoiceSchema.statics.createInvoice = async function (params) {
+  const {
+    particulars = particularsSeed,
+    isTaxable = true,
+    isSameState = true,
+    discountAmount = 9,
+  } = params;
+  const newParticulars = await TaxType.populateTaxTypes(particulars);
   validateParticulars(newParticulars, { isSameState, isTaxable });
 
   const invoice = new InvoiceService({

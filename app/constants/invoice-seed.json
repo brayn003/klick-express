@@ -1,0 +1,27 @@
+{
+  "organizationBrnach": "organization_branch_id",
+  "raisedDate": "2019-01-21T13:25:25.894Z",
+  "generateSerial": true,
+  "currency": "INR",
+  "taxInclusion": "inclusive",
+  "particulars": [{
+    "rate": 118,
+    "quantity": 1,
+    "discountRate": null,
+    "discountAmount": null,
+    "taxTypes": [
+      "5c43969be05315f9d3a67b09", 
+      "5c43969be05315f9d3a67b0e"
+    ]
+  }],
+
+  "dueDate": null,
+  "isUnderLUT": false,
+  "clientBranch": null,
+  "inlineComment": null,
+  "attachements": null,
+  "discountRate": null,
+  "discountAmount": null,
+  "tdsRate": null,
+  "tdsAmount": null
+}

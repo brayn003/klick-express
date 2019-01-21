@@ -16,8 +16,9 @@ const OrganizationSchema = new mongoose.Schema({
 
   invoicePreferences: {
     autoSerial: { type: Boolean, default: false },
+    taxPerItem: { type: Boolean, default: false },
+
     defaultTerms: { type: 'String', default: '' },
-    defaultItemized: { type: Boolean, defaulr: false },
 
     defaultEmailFrom: { type: String, default: process.env.EMAIL_NOREPLY },
     defaultEmailSubject: { type: String, default: 'New Invoice Raised' },
