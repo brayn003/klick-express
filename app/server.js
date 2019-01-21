@@ -49,17 +49,13 @@ async function main() {
   // routes
   app.use('/', require('./routes'));
 
-  require('~models/Invoice').createInvoice({});
-  // console.log(w);
-
-
   // app launch
-  // if (argv.repl) {
-  //   const replInstance = repl.start('> ');
-  //   replInstance.context.mongoose = mongoose;
-  // } else {
-  //   app.listen(port, () => console.log(chalk`{green Example app listening on port {bold ${port}}!}`));
-  // }
+  if (argv.repl) {
+    const replInstance = repl.start('> ');
+    replInstance.context.mongoose = mongoose;
+  } else {
+    app.listen(port, () => console.log(chalk`{green Example app listening on port {bold ${port}}!}`));
+  }
 }
 
 main();
