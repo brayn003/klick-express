@@ -37,15 +37,17 @@ const InvoiceSchema = new mongoose.Schema({
     rate: { type: Number, required: true },
     quantity: { type: Number, required: true },
 
+    discountRate: { type: Number, required: true },
+    discountAmount: { type: Number, required: true },
+
     taxes: [{
       taxType: { type: 'ObjectId', ref: 'TaxType' },
       amount: { type: Number, required: true },
     }],
-
-    // amount before discount and tax
-    // amount: { type: Number, required: true },
+    overallTaxRate: { type: Number, required: true },
     taxAmount: { type: Number, required: true },
-    // amount after discounts commissions, on which tax needs to applied
+
+    amount: { type: Number, required: true },
     taxableAmount: { type: Number, required: true },
     total: { type: Number, required: true },
   }],
@@ -54,15 +56,22 @@ const InvoiceSchema = new mongoose.Schema({
     taxType: { type: 'ObjectId', ref: 'TaxType' },
     amount: { type: Number, required: true },
   }],
-
-  // amount received as is
-  // total amount of tax
+  overallTaxRate: { type: Number, required: true },
   taxAmount: { type: Number, required: true },
 
-  // amount after discounts commissions, on which tax needs to applied
+  // amount before discounts/commissions and taxes
+  amount: { type: Number, required: true },
+  // amount before discounts/commissions, on which tax needs to applied
   taxableAmount: { type: Number, required: true },
+  // grand total after discount and commission
   total: { type: Number, required: true },
+
+  tdsRate: { type: Number, required: true },
+  tdsAmount: { type: Number, required: true },
+  amountReceivable: { type: Number, required: true },
+
   roundedTotal: { type: Number, required: true },
+  roundedAmountReceivable: { type: Number, required: true },
 
 }, {
   collection: 'invoice',
