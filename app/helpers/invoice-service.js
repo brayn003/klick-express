@@ -9,11 +9,15 @@ class InvoiceService {
     isTaxable,
     isSameState,
     taxInclusion,
+    discountAmount,
+    discountRate,
   }) {
     this.particulars = particulars;
     this.isTaxable = isTaxable;
     this.isSameState = isSameState;
     this.taxInclusion = taxInclusion;
+    this.discountAmount = discountAmount;
+    this.discountRate = discountRate;
 
     // method bindings
     this.getParticularDiscountAmount = this.getParticularDiscountAmount.bind(this);
@@ -28,10 +32,8 @@ class InvoiceService {
     let { discountAmount } = particular;
 
     if (isNil(particular.discountAmount) && !isNil(particular.discountRate)) {
-      discountAmount = +(
-        (particular.rate * particular.quantity)
-        * (particular.discountRate / 100)
-      ).toFixed(2);
+      discountAmount = (particular.rate * particular.quantity)
+        * (particular.discountRate / 100);
     }
 
     if (isNil(particular.discountAmount) && isNil(particular.discountRate)) {
@@ -44,35 +46,32 @@ class InvoiceService {
 
     if (this.taxInclusion === 'inclusive') {
       const taxRate = sumBy(particular.taxTypes, 'rate');
-      return +((discountAmount * 100) / (100 + taxRate)).toFixed(2);
+      return (discountAmount * 100) / (100 + taxRate);
     }
 
     return 0;
   }
 
   getParticularDiscountRate(particular) {
-    return +(
-      (this.discountAmount(particular) * 100)
-      / this.getTaxableAmount(particular)
-    ).toFixed(2);
+    return (this.discountAmount(particular) * 100) / this.getTaxableAmount(particular);
   }
 
   getParticularAmount(particular) {
     const discountAmount = this.getParticularDiscountAmount(particular);
 
     if (!this.isTaxable) {
-      return +((particular.rate * particular.quantity) + discountAmount).toFixed(2);
+      return (particular.rate * particular.quantity) + discountAmount;
     }
 
     if (this.isTaxable && this.taxInclusion === 'exclusive') {
-      return +((particular.rate * particular.quantity) + discountAmount).toFixed(2);
+      return (particular.rate * particular.quantity) + discountAmount;
     }
 
     if (this.isTaxable && this.taxInclusion === 'inclusive') {
       const total = (particular.quantity * particular.rate);
       const taxRate = sumBy(particular.taxTypes, 'rate');
       const taxableAmount = (total * 100) / (taxRate + 100);
-      return +(taxableAmount + discountAmount).toFixed(2);
+      return taxableAmount + discountAmount;
     }
 
     return null;
@@ -84,20 +83,20 @@ class InvoiceService {
 
   getParticularTaxAmount(particular) {
     const taxRate = sumBy(particular.taxTypes, 'rate');
-    return +(this.getParticularTaxableAmount(particular) * (taxRate / 100)).toFixed(2);
+    return this.getParticularTaxableAmount(particular) * (taxRate / 100);
   }
 
   getParticularTotal(particular) {
-    return +(this.getParticularTaxableAmount(particular) + this.getParticularTaxAmount(particular));
+    return this.getParticularTaxableAmount(particular) + this.getParticularTaxAmount(particular);
   }
 
   getParticularTaxes(particular) {
     const taxableAmount = this.getParticularTaxableAmount(particular);
     return particular.taxTypes
-      .map(taxType => ({ taxType, amount: +((taxType.rate / 100) * taxableAmount).toFixed(2) }));
+      .map(taxType => ({ taxType, amount: (taxType.rate / 100) * taxableAmount }));
   }
 
-  getTaxes() {
+  getAggregatedParticularTaxes() {
     const taxesMap = this.particulars.reduce((agg, particular) => {
       const particularTaxes = this.getParticularTaxes(particular);
       return particularTaxes.reduce((agg2, particularTax) => {
@@ -106,7 +105,7 @@ class InvoiceService {
         if (typeof agg3[key] === 'undefined') {
           agg3[key] = particularTax;
         } else {
-          agg3[key].amount = +(agg3[key].amount + particularTax.amount).toFixed(2);
+          agg3[key].amount += particularTax.amount;
         }
         return agg3;
       }, agg);
@@ -116,11 +115,11 @@ class InvoiceService {
 
   getTdsAmount() {
     if (!isNil(this.tdsAmount)) {
-      return +(this.tdsAmount).toFixed();
+      return this.tdsAmount;
     }
 
     if (isNil(this.tdsAmount) && !isNil(this.tdsRate)) {
-      return +(this.getTotal() * (this.tdsRate / 100)).toFixed(2);
+      return this.getTotal() * (this.tdsRate / 100);
     }
 
     return 0;
@@ -128,34 +127,66 @@ class InvoiceService {
 
   getTdsRate() {
     if (!isNil(this.tdsAmount)) {
-      return +((this.tdsAmount * 100) / this.getTotal()).toFixed(2);
+      return (this.tdsAmount * 100) / this.getTotal();
     }
 
     if (isNil(this.tdsAmount) && !isNil(this.tdsRate)) {
-      return +(this.tdsRate).toFixed(2);
+      return this.tdsRate;
     }
 
     return 0;
   }
 
+  getParticularTotalDiscountAmount() {
+    return sumBy(this.particulars, this.getParticularDiscountAmount);
+  }
+
+  getInvoiceDiscountAmount() {
+    let { discountAmount } = this;
+
+    if (isNil(this.discountAmount) && !isNil(this.discountRate)) {
+      discountAmount = this.getAmount() * (this.discountRate / 100);
+    }
+
+    if (isNil(this.discountAmount) && isNil(this.discountAmount)) {
+      discountAmount = 0;
+    }
+
+    if (this.taxInclusion === 'exclusive') {
+      return discountAmount;
+    }
+
+    if (this.taxInclusion === 'inclusive') {
+      return (discountAmount * 100) / (100 + this.getOverallTaxRate());
+    }
+
+    return 0;
+  }
+
+  getTotalDiscountAmount() {
+    return this.getInvoiceDiscountAmount() + this.getParticularTotalDiscountAmount();
+  }
+
   getAmount() {
-    return +sumBy(this.particulars, this.getParticularAmount).toFixed(2);
+    return sumBy(this.particulars, this.getParticularTaxableAmount);
   }
 
-  getDiscountAmount() {
-    return +sumBy(this.particulars, this.getParticularDiscountAmount).toFixed(2);
-  }
-
-  getTaxableAmount() {
-    return +sumBy(this.particulars, this.getParticularTaxableAmount).toFixed(2);
+  getOverallTaxRate() {
+    const totalParticularTaxAmount = sumBy(this.getAggregatedParticularTaxes(), 'amount');
+    return (totalParticularTaxAmount * 100)
+      / sumBy(this.particulars, this.getParticularTaxableAmount);
   }
 
   getTaxAmount() {
-    return +sumBy(this.particulars, this.getParticularTaxAmount).toFixed(2);
+    return this.getTaxableAmount() * (this.getOverallTaxRate() / 100);
+  }
+
+  getTaxableAmount() {
+    return this.getAmount() - this.getTotalDiscountAmount();
   }
 
   getTotal() {
-    return +sumBy(this.particulars, this.getParticularTotal).toFixed(2);
+    return this.getTaxableAmount() + this.getTaxAmount();
   }
 
   getRoundedTotal() {
@@ -163,7 +194,7 @@ class InvoiceService {
   }
 
   getAmountReceivable() {
-    return +(this.getTotal() - this.getTdsAmount()).toFixed(2);
+    return this.getTotal() - this.getTdsAmount();
   }
 
   getRoundedAmountReceivable() {

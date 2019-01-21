@@ -71,9 +71,9 @@ const InvoiceSchema = new mongoose.Schema({
 });
 
 const particularsSeed = [{
-  rate: 100,
+  rate: 118,
   quantity: 1,
-  discountAmount: 10,
+  discountAmount: 9,
   taxTypes: ['5c43969be05315f9d3a67b09', '5c43969be05315f9d3a67b0e'],
 }];
 
@@ -94,6 +94,7 @@ InvoiceSchema.statics.createInvoice = async function ({
   particulars = particularsSeed,
   isTaxable = true,
   isSameState = true,
+  discountAmount = 9,
 }) {
   const newParticulars = await getPopulatedParticulars(particulars);
   validateParticulars(newParticulars, { isSameState, isTaxable });
@@ -102,13 +103,14 @@ InvoiceSchema.statics.createInvoice = async function ({
     particulars: newParticulars,
     isTaxable,
     isSameState,
+    discountAmount,
     taxInclusion: 'inclusive',
   });
-  console.log('particulars -> ', invoice.particulars);
+  // console.log('particulars -> ', invoice.particulars);
   console.log('Amount ->         ', invoice.getAmount());
-  console.log('DiscountAmount -> ', -invoice.getDiscountAmount());
+  console.log('DiscountAmount -> ', -invoice.getTotalDiscountAmount());
   console.log('TaxableAmount ->  ', invoice.getTaxableAmount());
-  console.log('Tax Amount ->     ', -invoice.getTaxAmount());
+  console.log('Tax Amount ->     ', invoice.getTaxAmount());
   console.log('Grand Total ->    ', invoice.getTotal());
 };
 
