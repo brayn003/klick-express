@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const ParticularSchema = new mongoose.Schema({
   organization: { type: 'ObjectId', ref: 'Organization' },
 
-  hsnCode: { type: String, default: '' },
+  hsnCode: { type: String },
+  sacCode: { type: String },
 
   name: { type: String, required: true },
   description: { type: String },
