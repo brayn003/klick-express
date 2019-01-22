@@ -6,7 +6,7 @@ const ExpenseSchema = new mongoose.Schema({
   category: { type: 'ObjectId', ref: 'ExpenseCategory', required: true },
 
   title: { type: String, required: true },
-  serial: { type: Boolean, default: null },
+  serial: { type: String, default: null },
   expenseDate: { type: Date, required: true },
   taxInclusion: { type: String, enum: ['inclusive', 'exclusive'], required: true },
   taxableAmount: { type: Number, required: true },
