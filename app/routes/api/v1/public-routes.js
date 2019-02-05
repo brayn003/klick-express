@@ -9,5 +9,4 @@ router.post('/admin/login', require('~controllers/admin/login'));
 router.post('/admin/verify-token', require('~controllers/admin/verify-token'));
 router.post('/admin/add-admin', require('~controllers/admin/add'));
 
-
 module.exports = router;
