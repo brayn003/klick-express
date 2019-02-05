@@ -9,6 +9,7 @@ const InvoiceSchema = new mongoose.Schema({
   organizationBranch: { type: 'ObjectId', ref: 'OrganizationBranch', required: true },
   client: { type: 'ObjectId', ref: 'Organization', required: true },
   clientBranch: { type: 'ObjectId', ref: 'OrganizationBranch' },
+  payments: [{ type: 'ObjectId', ref: 'Payment' }],
 
   // dates
   raisedDate: { type: Date, required: true },

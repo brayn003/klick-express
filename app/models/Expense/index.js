@@ -4,6 +4,7 @@ const ExpenseSchema = new mongoose.Schema({
   // refs
   organization: { type: 'ObjectId', ref: 'Organization', required: true },
   category: { type: 'ObjectId', ref: 'ExpenseCategory', required: true },
+  payments: [{ type: 'ObjectId', ref: 'Payment' }],
 
   title: { type: String, required: true },
   serial: { type: String, default: null },
