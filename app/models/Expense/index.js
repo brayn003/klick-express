@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate');
 
 const ExpenseSchema = new mongoose.Schema({
   // refs
@@ -28,5 +29,29 @@ const ExpenseSchema = new mongoose.Schema({
   timestamps: true,
   userAudits: true,
 });
+
+ExpenseSchema.statics.createExpense = async function (params, createdBy) {
+  const expense = await this.create({ ...params, createdBy });
+  return expense.toJSON({ virtuals: true });
+};
+
+ExpenseSchema.statics.updateExpense = async function (params, createdBy) {
+  const expense = await this.update({ ...params, createdBy });
+  return expense.toJSON({ virtuals: true });
+};
+
+ExpenseSchema.statics.getAll = async function (params) {
+  const { name, user } = params;
+  const criteria = {};
+  if (name) criteria.name = { $regex: new RegExp(name, 'i') };
+  if (user) {
+    const roles = await this.model('OrganizationUser').find({ user });
+    const expenseIds = roles.map(c => mongoose.Types.ObjectId(c.expense));
+    criteria._id = { $in: expenseIds };
+  }
+  const expenses = await this.paginate(criteria, { lean: true });
+  return expenses;
+};
+ExpenseSchema.plugin(mongoosePaginate);
 const Expense = mongoose.model('Expense', ExpenseSchema);
 module.exports = Expense;
