@@ -35,8 +35,8 @@ ExpenseSchema.statics.createExpense = async function (params, createdBy) {
   return expense.toJSON({ virtuals: true });
 };
 
-ExpenseSchema.statics.updateExpense = async function (params, createdBy) {
-  const expense = await this.update({ ...params, createdBy });
+ExpenseSchema.statics.updateExpense = async function (id, body) {
+  const expense = await this.findByAndUpdate({ id, body });
   return expense.toJSON({ virtuals: true });
 };
 
