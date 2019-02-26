@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
-const InvoiceService = require('~helpers/invoice-service');
-const { validateParticulars } = require('~helpers/tax-service');
-const TaxType = require('~models/TaxType');
+const Particular = require('~models/Particular');
+// const InvoiceService = require('~helpers/invoice-service');
+// const { validateParticulars } = require('~helpers/tax-service');
+// const TaxType = require('~models/TaxType');
 
 const InvoiceParticularSchema = new mongoose.Schema({
   details: { type: 'ObjectId', ref: 'InvoiceParticular' },
@@ -85,36 +86,9 @@ const InvoiceSchema = new mongoose.Schema({
   userAudits: true,
 });
 
-const particularsSeed = [{
-  rate: 118,
-  quantity: 1,
-  discountAmount: 9,
-  taxTypes: ['5c43969be05315f9d3a67b09', '5c43969be05315f9d3a67b0e'],
-}];
-
-InvoiceSchema.statics.createInvoice = async function (params) {
-  const {
-    particulars = particularsSeed,
-    isTaxable = true,
-    isSameState = true,
-    discountAmount = 9,
-  } = params;
-  const newParticulars = await TaxType.populateTaxTypes(particulars);
-  validateParticulars(newParticulars, { isSameState, isTaxable });
-
-  const invoice = new InvoiceService({
-    particulars: newParticulars,
-    isTaxable,
-    isSameState,
-    discountAmount,
-    taxInclusion: 'inclusive',
-  });
-  // console.log('particulars -> ', invoice.particulars);
-  console.log('Amount ->         ', invoice.getAmount());
-  console.log('DiscountAmount -> ', -invoice.getTotalDiscountAmount());
-  console.log('TaxableAmount ->  ', invoice.getTaxableAmount());
-  console.log('Tax Amount ->     ', invoice.getTaxAmount());
-  console.log('Grand Total ->    ', invoice.getTotal());
+InvoiceSchema.statics.createInvoice = async function (invoiceBody) {
+  const invoice = this.create(invoiceBody);
+  return invoice.toJSON({ virtuals: true });
 };
 
 module.exports = mongoose.model('Invoice', InvoiceSchema);

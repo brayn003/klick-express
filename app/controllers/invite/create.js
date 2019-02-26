@@ -1,7 +1,7 @@
 const { check } = require('express-validator/check');
 
-const Invite = require('../../models/Invite');
-const { validateParams } = require('../../helpers/validation-service');
+const Invite = require('~models/Invite');
+const { validateParams } = require('~helpers/validation-service');
 
 const checks = [
   check('email').isEmail().withMessage('Not a valid email'),
