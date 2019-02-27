@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const Particular = require('~models/Particular');
+const mongoosePaginate = require('mongoose-paginate');
+// const Particular = require('~models/Particular');
 // const InvoiceService = require('~helpers/invoice-service');
 // const { validateParticulars } = require('~helpers/tax-service');
 // const TaxType = require('~models/TaxType');
@@ -90,5 +91,21 @@ InvoiceSchema.statics.createInvoice = async function (invoiceBody) {
   const invoice = this.create(invoiceBody);
   return invoice.toJSON({ virtuals: true });
 };
+
+InvoiceSchema.statics.getAll = async function (params) {
+  const {
+    from, to, serial, status,
+  } = params;
+  const criteria = {};
+  if (from || to) criteria.raisedDate = {};
+  if (from) criteria.raisedDate.$gte = new Date(from);
+  if (to) criteria.raisedDate.$lte = new Date(to);
+  if (serial) criteria.serial = { $regex: new RegExp(serial, 'i') };
+  if (status) criteria.status = status;
+  const invoices = await this.paginate(criteria, { lean: true });
+  return invoices;
+};
+
+InvoiceSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('Invoice', InvoiceSchema);
