@@ -50,7 +50,7 @@ const InvoiceSchema = new mongoose.Schema({
   currency: { type: String, required: true },
   taxPerItem: { type: Boolean, required: true },
   taxInclusion: { type: String, enum: ['inclusive', 'exclusive'], required: true },
-  serial: { type: Boolean, default: null },
+  serial: { type: String, default: null },
   status: { type: String, enum: ['open', 'closed', 'cancelled'], default: 'open' },
   inlineComment: { type: String },
   attachments: [{ type: String }],
@@ -94,7 +94,7 @@ InvoiceSchema.statics.createInvoice = async function (invoiceBody) {
 
 InvoiceSchema.statics.getAll = async function (params) {
   const {
-    from, to, serial, status,
+    from, to, serial, status, organization,
   } = params;
   const criteria = {};
   if (from || to) criteria.raisedDate = {};
@@ -102,7 +102,8 @@ InvoiceSchema.statics.getAll = async function (params) {
   if (to) criteria.raisedDate.$lte = new Date(to);
   if (serial) criteria.serial = { $regex: new RegExp(serial, 'i') };
   if (status) criteria.status = status;
-  const invoices = await this.paginate(criteria, { lean: true });
+  if (organization) criteria.organization = organization;
+  const invoices = await this.paginate(criteria, { lean: true, sort: { raisedDate: 'desc' } });
   return invoices;
 };
 
