@@ -5,7 +5,7 @@
   "description": "Klick backend in express",
   "main": "app/server.js",
   "scripts": {
-    "dev": "nodemon .",
+    "start:dev": "nodemon .",
     "repl": "node . --repl",
     "migrate": "node ./migrate/index.js"
   },
