@@ -34,6 +34,8 @@ async function up(con) {
     newOrg.invoicePreferences.defaultTerms = oldOrg.invoiceTerms;
     newOrg.invoicePreferences.defaultEmailSubject = oldOrg.invoiceEmailSubject;
     newOrg.invoicePreferences.defaultEmailBody = oldOrg.invoiceEmailBody;
+    newOrg.expensePreferences = {};
+    newOrg.expensePreferences.showAccountType = false;
 
     const newBranch = { ...convertMeta(oldOrg) };
     newBranch.updatedAt = null;

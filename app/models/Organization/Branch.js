@@ -7,8 +7,8 @@ const BranchSchema = new mongoose.Schema({
   code: {
     type: String, minlength: 2, maxlength: 4, required: true,
   },
-  address_line1: { type: String, required: true },
-  address_line2: { type: String },
+  addressLineOne: { type: String, required: true },
+  addressLineTwo: { type: String },
   state: { type: 'ObjectId', ref: 'Location', required: true },
   city: { type: 'ObjectId', ref: 'Location', required: true },
   pincode: { type: String, required: true },

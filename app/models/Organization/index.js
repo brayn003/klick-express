@@ -8,6 +8,7 @@ const OrganizationSchema = new mongoose.Schema({
   phone: { type: String, default: '' },
   email: { type: String, default: '' },
   logo: { type: String, default: '' },
+  signature: { type: String, default: '' },
 
   code: {
     type: String,
