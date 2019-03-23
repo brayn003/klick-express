@@ -1,14 +1,19 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
+const OrganizationUser = require('./User');
 
 const OrganizationSchema = new mongoose.Schema({
   name: { type: String, required: true, minlength: 5 },
-  panNumber: { type: String, required: true },
+  pan: { type: String, required: true },
   phone: { type: String, default: '' },
   email: { type: String, default: '' },
   logo: { type: String, default: '' },
+
   code: {
-    type: String, minlength: 2, maxlength: 4, required: true,
+    type: String,
+    minlength: 2,
+    maxlength: 4,
+    required: true,
   },
 
   industryType: { type: String, enum: ['product-based', 'service-based'], default: 'product-based' },
@@ -17,6 +22,7 @@ const OrganizationSchema = new mongoose.Schema({
   invoicePreferences: {
     autoSerial: { type: Boolean, default: false },
     taxPerItem: { type: Boolean, default: false },
+    includeQuantity: { type: Boolean, default: false },
 
     defaultTerms: { type: 'String', default: '' },
 
@@ -37,7 +43,7 @@ const OrganizationSchema = new mongoose.Schema({
   userAudits: true,
 });
 
-OrganizationSchema.statics.createOrganization = async function (params, createdBy) {
+OrganizationSchema.statics.createOne = async function (params, createdBy) {
   const organization = await this.create({ ...params, createdBy });
   return organization.toJSON({ virtuals: true });
 };
@@ -47,7 +53,7 @@ OrganizationSchema.statics.getAll = async function (params) {
   const criteria = {};
   if (name) criteria.name = { $regex: new RegExp(name, 'i') };
   if (user) {
-    const roles = await this.model('OrganizationUser').find({ user });
+    const roles = await OrganizationUser.find({ user });
     const organizationIds = roles.map(c => mongoose.Types.ObjectId(c.organization));
     criteria._id = { $in: organizationIds };
   }

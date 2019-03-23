@@ -6,7 +6,7 @@ const { transformError } = require('~/helpers/error-handlers');
 module.exports = async (req, res) => {
   const { body, user } = req;
   try {
-    const organization = await Organization.createOrganization(body, user.id);
+    const organization = await Organization.createOne(body, user.id);
     await OrganizationUser.add(user.id, organization.id, user.id);
     return res.status(201).json(organization);
   } catch (e) {

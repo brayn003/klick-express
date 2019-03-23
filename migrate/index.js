@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const { argv } = require('yargs');
 const Umzug = require('umzug');
 const mongodb = require('mongodb');
 const path = require('path');
@@ -12,7 +13,6 @@ function migName(file) {
 async function initUmzug() {
   const con = await mongodb.connect(process.env.MONGODB_URL, { useNewUrlParser: true });
   const connection = con.db(process.env.MONGODB_DB);
-
   const umzug = new Umzug({
     storage: 'mongodb',
     storageOptions: {
@@ -23,7 +23,7 @@ async function initUmzug() {
       params: [
         connection,
       ],
-      path: 'migrate/migrations',
+      path: `migrate/${argv.dir ? argv.dir : 'migrations'}`,
       pattern: /\.js$/,
     },
   });
@@ -72,7 +72,7 @@ async function cmdDownAll(umzug) {
 }
 
 async function executeCmd(umzug) {
-  const cmd = process.argv[2] ? process.argv[2].trim() : '';
+  const cmd = argv._[0];
   let executedCmd;
   switch (cmd) {
     case 'list':
