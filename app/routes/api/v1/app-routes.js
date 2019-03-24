@@ -6,6 +6,7 @@ router.get('/users', require('~controllers/user/find'));
 router.get('/user/me', require('~controllers/user/me'));
 
 router.get('/organizations', require('~controllers/organization/find'));
+router.get('/organization/:id', require('~controllers/organization/findOne'));
 router.post('/organization', require('~controllers/organization/create'));
 
 router.get('/invoices', require('~controllers/invoice/find'));
