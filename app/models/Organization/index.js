@@ -62,6 +62,11 @@ OrganizationSchema.statics.getAll = async function (params) {
   return organizations;
 };
 
+OrganizationSchema.statics.getById = async function (id) {
+  const organization = await this.findById(id);
+  return organization.toJSON({ virtuals: true });
+};
+
 OrganizationSchema.pre('save', async function (next) {
   this.invoiceSerialPrefix = this.name.substring(0, 3).toUpperCase();
   return next();

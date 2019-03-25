@@ -88,7 +88,7 @@ const InvoiceSchema = new mongoose.Schema({
   userAudits: true,
 });
 
-InvoiceSchema.statics.createInvoice = async function (invoiceBody) {
+InvoiceSchema.statics.add = async function (invoiceBody) {
   const invoice = this.create(invoiceBody);
   return invoice.toJSON({ virtuals: true });
 };
@@ -106,6 +106,17 @@ InvoiceSchema.statics.getAll = async function (params) {
   if (organization) criteria.organization = organization;
   const invoices = await this.paginate(criteria, { lean: true, sort: { raisedDate: 'desc' } });
   return invoices;
+};
+
+InvoiceSchema.statics.getNewSerial = async function (params) {
+  const { organization, branch } = params;
+  const count = await this.count({
+    organization: organization.id,
+    branch: branch.id,
+    serial: { '!=': null },
+  }).sort('-createdAt');
+
+  return `${organization.code}/${branch.code}/${count + 1}`;
 };
 
 InvoiceSchema.plugin(mongoosePaginate);

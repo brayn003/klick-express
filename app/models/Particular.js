@@ -16,32 +16,48 @@ const ParticularSchema = new mongoose.Schema({
   collection: 'particular',
 });
 
-ParticularSchema.statics.findOrAddParticulars = async function (particulars, createdBy = null) {
-  const particularDetails = particulars.map(particular => particular.details);
+ParticularSchema.statics.getOrAdd = async function (particulars, createdBy = null) {
+  const particularDetails = particulars.map((particular) => {
+    if (typeof particular.details === 'string') {
+      return particular.details;
+    }
+    if (typeof particular.details === 'object') {
+      return { indicativePrice: particular.rate, ...particular.details };
+    }
+    throw new Error('Not a valid value for detials');
+  });
 
   const oldParticularIds = particularDetails
-    .filter(particular => typeof particular.details === 'string');
+    .filter(pd => typeof pd === 'string');
   const oldParticulars = await this.find({ _id: { $in: oldParticularIds } });
 
   const newParticularDetails = particularDetails
-    .filter(particular => typeof particular.details === 'object');
+    .filter(pd => typeof pd === 'object');
   const newParticulars = await this.createParticulars(newParticularDetails, createdBy);
 
-  return particularDetails.map((detail) => {
-    if (typeof detail === 'string') {
-      return oldParticulars.find(particular => particular.id === detail).toJSON({ virtuals: true });
-    }
-    if (typeof detail === 'object') {
-      return newParticulars.unshift();
-    }
-    throw new Error('Not a valid value');
-  });
+  return particulars
+    .map((particular) => {
+      const { details } = particular;
+      if (typeof details === 'string') {
+        return {
+          ...particular,
+          details: oldParticulars.find(p => p.id === details).toJSON({ virtuals: true }).id,
+        };
+      }
+      if (typeof details === 'object') {
+        return {
+          ...particular,
+          details: newParticulars.shift(),
+        };
+      }
+      throw new Error('Not a valid value');
+    });
 };
 
 ParticularSchema.statics.createParticulars = async function (particulars, createdBy = null) {
   const updatedParticulars = particulars.map(p => ({ ...p, createdBy }));
   const newParticulars = await this.insertMany(updatedParticulars);
-  return newParticulars.toJSON({ virtuals: true });
+  return newParticulars;
 };
 
 ParticularSchema.statics.createParticular = async function (params, createdBy = null) {

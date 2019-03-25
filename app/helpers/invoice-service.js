@@ -11,6 +11,8 @@ class InvoiceService {
     taxInclusion,
     discountAmount,
     discountRate,
+    tdsAmount,
+    tdsRate,
   }) {
     this.particulars = particulars;
     this.isTaxable = isTaxable;
@@ -18,7 +20,8 @@ class InvoiceService {
     this.taxInclusion = taxInclusion;
     this.discountAmount = discountAmount;
     this.discountRate = discountRate;
-
+    this.tdsAmount = tdsAmount;
+    this.tdsRate = tdsRate;
     // method bindings
     this.getParticularDiscountAmount = this.getParticularDiscountAmount.bind(this);
     this.getParticularAmount = this.getParticularAmount.bind(this);
@@ -53,8 +56,14 @@ class InvoiceService {
   }
 
   getParticularDiscountRate(particular) {
-    return (this.discountAmount(particular) * 100) / this.getTaxableAmount(particular);
+    return (this.getParticularDiscountAmount(particular) * 100) / this.getTaxableAmount(particular);
   }
+
+  /* eslint-disable */
+  getParticularOverallTaxRate(particular) {
+    return sumBy(particular.taxTypes, 'rate');
+  }
+  /* eslint-enable */
 
   getParticularAmount(particular) {
     const discountAmount = this.getParticularDiscountAmount(particular);
@@ -92,7 +101,7 @@ class InvoiceService {
 
   getParticularTaxes(particular) {
     const taxableAmount = this.getParticularTaxableAmount(particular);
-    return particular.taxTypes
+    return (particular.taxTypes || [])
       .map(taxType => ({ taxType, amount: (taxType.rate / 100) * taxableAmount }));
   }
 
@@ -144,11 +153,11 @@ class InvoiceService {
   getInvoiceDiscountAmount() {
     let { discountAmount } = this;
 
-    if (isNil(this.discountAmount) && !isNil(this.discountRate)) {
+    if (!this.discountAmount && this.discountRate) {
       discountAmount = this.getAmount() * (this.discountRate / 100);
     }
 
-    if (isNil(this.discountAmount) && isNil(this.discountAmount)) {
+    if (!this.discountAmount && !this.discountRate) {
       discountAmount = 0;
     }
 

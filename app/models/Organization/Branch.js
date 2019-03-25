@@ -19,4 +19,12 @@ const BranchSchema = new mongoose.Schema({
   timestamps: true,
 });
 
+BranchSchema.statics.getById = async function (id) {
+  const branch = await this.findById(id);
+  if (branch) {
+    return branch.toJSON({ virtuals: true });
+  }
+  return null;
+};
+
 module.exports = mongoose.model('OrganizationBranch', BranchSchema);
