@@ -13,15 +13,25 @@ const organizationUserSchema = new mongoose.Schema({
   userAudits: true,
 });
 
-organizationUserSchema.statics.add = async function (userId, orgId, by) {
-  const oldRole = await this.findOne({ user: userId, organization: orgId });
+organizationUserSchema.statics.createOne = async function (params, createdBy = null) {
+  const {
+    user,
+    organization,
+    role: userRole,
+  } = params;
+  const oldRole = await this.findOne({ user, organization });
   let role = {};
   if (oldRole && !oldRole.deleted) {
     throw new Error('User already exists in the organization');
   } else if (oldRole && oldRole.deleted) {
-    role = await oldRole.restore({ user: userId, organization: orgId });
+    role = await oldRole.restore({ user, organization });
   } else {
-    role = await this.create({ user: userId, organization: orgId, createdBy: by });
+    role = await this.create({
+      user,
+      organization,
+      createdBy,
+      role: userRole,
+    });
   }
   return role.toJSON({ virtuals: true });
 };

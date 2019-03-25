@@ -4,17 +4,17 @@ const OrganizationUser = require('./User');
 
 const OrganizationSchema = new mongoose.Schema({
   name: { type: String, required: true, minlength: 5 },
-  pan: { type: String, required: true },
+  pan: { type: String, default: '' },
   phone: { type: String, default: '' },
   email: { type: String, default: '' },
   logo: { type: String, default: '' },
   signature: { type: String, default: '' },
+  verified: { type: Boolean, default: false },
 
   code: {
     type: String,
     minlength: 2,
     maxlength: 4,
-    required: true,
   },
 
   industryType: { type: String, enum: ['product-based', 'service-based'], default: 'product-based' },
@@ -67,8 +67,8 @@ OrganizationSchema.statics.getById = async function (id) {
   return organization.toJSON({ virtuals: true });
 };
 
-OrganizationSchema.pre('save', async function (next) {
-  this.invoiceSerialPrefix = this.name.substring(0, 3).toUpperCase();
+OrganizationSchema.pre('save', function (next) {
+  if (!this.code) this.code = this.name.substring(0, 3).toUpperCase();
   return next();
 });
 
