@@ -41,7 +41,7 @@ ParticularSchema.statics.getOrAdd = async function (particulars, createdBy = nul
       if (typeof details === 'string') {
         return {
           ...particular,
-          details: oldParticulars.find(p => p.id === details).toJSON({ virtuals: true }).id,
+          details: oldParticulars.find(p => p.id === details).id,
         };
       }
       if (typeof details === 'object') {
@@ -62,7 +62,7 @@ ParticularSchema.statics.createParticulars = async function (particulars, create
 
 ParticularSchema.statics.createParticular = async function (params, createdBy = null) {
   const particular = await this.create({ ...params, createdBy });
-  return particular.toJSON({ virtuals: true });
+  return particular;
 };
 
 module.exports = mongoose.model('InvoiceParticular', ParticularSchema);

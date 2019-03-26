@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
+require('~models/Location');
 
 const BranchSchema = new mongoose.Schema({
   organization: { type: 'ObjectId', ref: 'Organization', required: true },
@@ -21,11 +22,11 @@ const BranchSchema = new mongoose.Schema({
 });
 
 BranchSchema.statics.getById = async function (id) {
-  const branch = await this.findById(id);
-  if (branch) {
-    return branch.toJSON({ virtuals: true });
-  }
-  return null;
+  const branch = await this.findById(id)
+    .populate('state')
+    .populate('city')
+    .populate('organization');
+  return branch;
 };
 
 BranchSchema.statics.getAll = async function (params) {
@@ -37,9 +38,15 @@ BranchSchema.statics.getAll = async function (params) {
   return branches;
 };
 
-BranchSchema.statics.createOne = async function (params, createdBy = null) {
-  const branch = await this.create({ ...params, createdBy });
-  return branch.toJSON({ virtuals: true });
+BranchSchema.statics.createOne = async function (params) {
+  const branch = await this.create(params);
+  return branch;
+};
+
+BranchSchema.statics.patchOne = async function (id, params) {
+  await this.updateOne({ _id: id }, { $set: params });
+  const branch = await this.getById(id);
+  return branch;
 };
 
 BranchSchema.pre('save', async function (next) {

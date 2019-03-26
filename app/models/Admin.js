@@ -49,7 +49,7 @@ AdminSchema.statics.authenticate = async function (email, password) {
   }
 
   const token = await createJWT(
-    { ...omit(user.toJSON({ virtuals: true }), ['password']), admin },
+    { ...omit(user.toJSON(), ['password']), admin },
     process.env.ADMIN_AUTH_SECRET,
     { expiresIn: '1d' },
   );

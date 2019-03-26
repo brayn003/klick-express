@@ -13,11 +13,12 @@ const organizationUserSchema = new mongoose.Schema({
   userAudits: true,
 });
 
-organizationUserSchema.statics.createOne = async function (params, createdBy = null) {
+organizationUserSchema.statics.createOne = async function (params) {
   const {
     user,
     organization,
     role: userRole,
+    createdBy,
   } = params;
   const oldRole = await this.findOne({ user, organization });
   let role = {};
@@ -33,7 +34,7 @@ organizationUserSchema.statics.createOne = async function (params, createdBy = n
       role: userRole,
     });
   }
-  return role.toJSON({ virtuals: true });
+  return role;
 };
 
 organizationUserSchema.statics.remove = async function (userId, orgId, by) {

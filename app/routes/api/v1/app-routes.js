@@ -7,6 +7,7 @@ router.get('/user/me', require('~controllers/user/me'));
 
 router.get('/organization/branches', require('~controllers/organization-branch/find'));
 router.post('/organization/branch', require('~controllers/organization-branch/create'));
+router.patch('/organization/branch/:id', require('~controllers/organization-branch/update'));
 
 router.get('/organizations', require('~controllers/organization/find'));
 router.get('/organization/:id', require('~controllers/organization/findOne'));

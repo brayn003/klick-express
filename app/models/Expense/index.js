@@ -32,12 +32,12 @@ const ExpenseSchema = new mongoose.Schema({
 
 ExpenseSchema.statics.createExpense = async function (params, createdBy) {
   const expense = await this.create({ ...params, createdBy });
-  return expense.toJSON({ virtuals: true });
+  return expense;
 };
 
 ExpenseSchema.statics.updateExpense = async function (id, body) {
   const expense = await this.findByAndUpdate({ id, body });
-  return expense.toJSON({ virtuals: true });
+  return expense;
 };
 
 ExpenseSchema.statics.getAll = async function (params) {

@@ -13,6 +13,9 @@ const repl = require('repl');
 
 function dbConnect() {
   mongoose.set('useCreateIndex', true);
+  mongoose.set('toJSON', { virtuals: true });
+  mongoose.set('useFindAndModify', false);
+
   mongoose.plugin(mongooseDelete, {
     overrideMethods: true,
     deletedAt: true,

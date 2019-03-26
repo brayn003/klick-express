@@ -34,7 +34,7 @@ UserSchema.statics.authenticate = async function (email, password) {
     throw new Error('Password is incorrect');
   }
   const token = await createJWT(
-    omit(user.toJSON({ virtuals: true }), ['password']),
+    omit(user.toJSON(), ['password']),
     process.env.AUTH_SECRET,
     { expiresIn: '1d' },
   );
@@ -53,7 +53,7 @@ UserSchema.statics.getUsers = async function (params) {
 UserSchema.statics.createUser = async function (params) {
   const { email, name, password } = params;
   const user = await this.create({ email, name, password });
-  return omit(user.toJSON({ virtuals: true }), ['password']);
+  return omit(user.toJSON(), ['password']);
 };
 
 UserSchema.pre('save', async function (next) {

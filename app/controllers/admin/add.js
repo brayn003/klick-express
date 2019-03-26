@@ -5,7 +5,7 @@ module.exports = async (req, res) => {
   const { userId } = req.body;
   try {
     const admin = await Admin.addAdmin(userId, user.id);
-    return res.status(201).json(admin.toJSON({ virtuals: true }));
+    return res.status(201).json(admin);
   } catch (e) {
     return res.status(401).json({ messages: [e instanceof Error ? e.toString() : e] });
   }

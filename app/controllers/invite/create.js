@@ -12,7 +12,7 @@ async function controller(req, res) {
   const { email } = req.body;
   try {
     const invite = await Invite.createInvite(email, user.id);
-    return res.status(201).json(invite.toJSON());
+    return res.status(201).json(invite);
   } catch (e) {
     return res.status(400).json({ messages: [e instanceof Error ? e.toString() : e] });
   }

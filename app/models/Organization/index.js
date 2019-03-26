@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
-const OrganizationUser = require('./User');
+const OrganizationUser = require('~models/Organization/User');
+const Branch = require('~models/Organization/Branch');
 
 const OrganizationSchema = new mongoose.Schema({
   name: { type: String, required: true, minlength: 5 },
@@ -10,12 +11,8 @@ const OrganizationSchema = new mongoose.Schema({
   logo: { type: String, default: '' },
   signature: { type: String, default: '' },
   verified: { type: Boolean, default: false },
-
-  code: {
-    type: String,
-    minlength: 2,
-    maxlength: 4,
-  },
+  defaultBranch: { type: 'ObjectId', ref: 'OrganizationBranch' },
+  code: { type: String, minlength: 2, maxlength: 4 },
 
   industryType: { type: String, enum: ['product-based', 'service-based'], default: 'product-based' },
   isUnderComposition: { type: Boolean, default: false },
@@ -25,7 +22,7 @@ const OrganizationSchema = new mongoose.Schema({
     taxPerItem: { type: Boolean, default: false },
     includeQuantity: { type: Boolean, default: false },
 
-    defaultTerms: { type: 'String', default: '' },
+    defaultTerms: { type: String, default: '' },
 
     defaultEmailFrom: { type: String, default: process.env.EMAIL_NOREPLY },
     defaultEmailSubject: { type: String, default: 'New Invoice Raised' },
@@ -34,7 +31,7 @@ const OrganizationSchema = new mongoose.Schema({
     defaultTemplate: { type: String, default: 'default' },
   },
 
-  exponsePreferences: {
+  expensePreferences: {
     showAccountType: { type: Boolean, default: false },
   },
 
@@ -44,9 +41,22 @@ const OrganizationSchema = new mongoose.Schema({
   userAudits: true,
 });
 
-OrganizationSchema.statics.createOne = async function (params, createdBy) {
-  const organization = await this.create({ ...params, createdBy });
-  return organization.toJSON({ virtuals: true });
+OrganizationSchema.statics.createOne = async function (params) {
+  const organization = await this.create(params);
+  await OrganizationUser.createOne({
+    user: params.createdBy,
+    organization: organization.id,
+    role: 'owner',
+  });
+  const branch = await Branch.createOne({
+    name: 'DEFAULT BRANCH',
+    organization: organization.id,
+    createdBy: params.createdBy,
+  });
+  await this.updateOne({ _id: organization.id }, { defaultBranch: branch.id })
+    .populate('defaultBranch');
+  const newOrg = await this.getById(organization.id);
+  return newOrg;
 };
 
 OrganizationSchema.statics.getAll = async function (params) {
@@ -63,8 +73,10 @@ OrganizationSchema.statics.getAll = async function (params) {
 };
 
 OrganizationSchema.statics.getById = async function (id) {
-  const organization = await this.findById(id);
-  return organization.toJSON({ virtuals: true });
+  const organization = await this.findById(id)
+    .populate('defaultBranch')
+    .populate('createdBy');
+  return organization;
 };
 
 OrganizationSchema.pre('save', function (next) {

@@ -91,7 +91,7 @@ const InvoiceSchema = new mongoose.Schema({
 
 InvoiceSchema.statics.add = async function (invoiceBody) {
   const invoice = this.create(invoiceBody);
-  return invoice.toJSON({ virtuals: true });
+  return invoice;
 };
 
 InvoiceSchema.statics.getAll = async function (params) {

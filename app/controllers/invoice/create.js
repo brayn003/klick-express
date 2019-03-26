@@ -146,7 +146,7 @@ async function controller(req, res) {
     roundedAmountReceivable: invoiceInstance.getRoundedAmountReceivable(),
   });
 
-  return res.status(201).json(invoice.toJSON({ virtuals: true }));
+  return res.status(201).json(invoice);
 }
 
 module.exports = [validateParams(schemaCheck), controller];
