@@ -113,6 +113,7 @@ async function controller(req, res) {
     isTaxable,
     currency,
     taxPerItem: organization.invoicePreferences.taxPerItem,
+    includeQuantity: organization.invoicePreferences.includeQuantity,
     taxInclusion,
     serial,
     inlineComment,

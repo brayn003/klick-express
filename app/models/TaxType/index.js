@@ -1,9 +1,11 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate');
 
 const TaxTypeSchema = new mongoose.Schema({
   type: { type: String, required: true },
   name: { type: String, required: true },
   rate: { type: Number, required: true },
+  config: {},
 }, {
   userAudits: true,
   timestamps: true,
@@ -22,5 +24,15 @@ TaxTypeSchema.statics.populateTaxTypes = async function (collection, key = 'taxT
     return { ...p, [key]: taxTypes };
   });
 };
+
+TaxTypeSchema.statics.getAll = async function (params) {
+  const { name, ...rest } = params;
+  const criteria = { ...rest };
+  if (name) criteria.name = { $regex: new RegExp(name, 'i') };
+  const taxTypes = await this.paginate(criteria, { lean: true });
+  return taxTypes;
+};
+
+TaxTypeSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('TaxType', TaxTypeSchema);

@@ -21,4 +21,6 @@ router.patch('/expense', require('~controllers/expense/update'));
 
 router.get('/upload/signed-url', require('~/controllers/upload/getSignedUrl'));
 
+router.get('/tax-types', require('~/controllers/tax-type/find'));
+
 module.exports = router;

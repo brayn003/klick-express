@@ -49,6 +49,7 @@ const InvoiceSchema = new mongoose.Schema({
 
   // properties
   currency: { type: String, required: true },
+  includeQuantity: { type: Boolean, required: true },
   taxPerItem: { type: Boolean, required: true },
   taxInclusion: { type: String, enum: ['inclusive', 'exclusive'], required: true },
   serial: { type: String, default: null },
