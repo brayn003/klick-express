@@ -12,12 +12,13 @@ router.get('/organizations', require('~controllers/organization/find'));
 router.get('/organization/:id', require('~controllers/organization/findOne'));
 router.post('/organization', require('~controllers/organization/create'));
 
-
 router.get('/invoices', require('~controllers/invoice/find'));
 router.post('/invoice', require('~controllers/invoice/create'));
 
 router.get('/expenses', require('~controllers/expense/find'));
 router.post('/expense', require('~controllers/expense/create'));
 router.patch('/expense', require('~controllers/expense/update'));
+
+router.get('/upload/signed-url', require('~/controllers/upload/getSignedUrl'));
 
 module.exports = router;
