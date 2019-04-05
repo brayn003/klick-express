@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Invoice</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700" rel="stylesheet">
+    <style>
+      html, body, .invoice {
+        width: 1190px;
+        min-height: 1684px;
+        margin: 0;
+        border: 0;
+        padding: 0;
+      }
+
+      html {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      body, pre {
+        font-family: 'Source Sans Pro', sans-serif;
+        font-size: 18px;
+      }
+
+      pre {
+        white-space: pre-wrap;
+        margin: 0;
+      }
+
+      .invoice-body {
+        padding: 64px;
+        min-height: inherit;
+        box-sizing: border-box;
+        background-color: white;
+        position: relative;
+      }
+
+      .logo-container {
+        width: 280px;
+        height: 160px;
+      }
+
+      .logo-container > img {
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      .logo-title {
+        font-size: 3em;
+      }
+
+      .col-25 {
+        width: 25%;
+        float: left;
+      }
+
+      .col-50 {
+        width: 50%;
+        float: left;
+      }
+
+      .col-70 {
+        width: 70%;
+        float: left;
+      }
+
+      .col-15 {
+        width: 15%;
+        float: left;
+      }
+
+      .col-10 {
+        width: 10%;
+        float: left;
+      }
+
+      .col-20 {
+        width: 20%;
+        float: left;
+      }
+
+      .col-35 {
+        width: 35%;
+        float: left;
+      }
+
+      .mw-300 {
+        max-width: 300px;
+      }
+
+      .bold {
+        font-weight: 800;
+      }
+
+      .clearfix-container {
+        width: 100%;
+        position: relative;
+      }
+
+      .clearfix-container::after {
+        content: "";
+        clear: both;
+        display: table;
+      }
+
+      p {
+        margin-top: 0;
+        margin-bottom: 8px;
+      }
+
+      .invoice-title {
+        font-weight: 600;
+        font-size: 2em;
+      }
+
+      .m-0{
+        margin: 0;
+      }
+
+      .mb-32 {
+        margin-bottom: 32px;
+      }
+
+      .mb-8 {
+        margin-bottom: 8px;
+      }
+
+      .mt-32 {
+        margin-top: 32px;
+      }
+
+      .cell-small {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        font-size: 0.8em;
+      }
+
+      .relative {
+        position: relative;
+      }
+
+      .absolute {
+        position: absolute;
+      }
+
+      .float-right {
+        float: right;
+      }
+
+
+
+      .details {
+        width: 100%;
+        margin-bottom: 48px;
+      }
+
+      .recipient-details, .invoice-details {
+        width: 50%;
+        float: left;
+      }
+
+      .recipient-title {
+        font-size: 1.3em;
+        margin-top: 0px;
+        margin-bottom: 16px;
+      }
+
+      .recipient-details-text {
+        margin-bottom: 0;
+        margin-top: 0;
+      }
+
+      .recipient-address {
+        margin-bottom: 8px;
+      }
+
+      .invoice-details-text {
+        margin-top: 0;
+        margin-bottom: 8px;
+        text-align: right;
+      }
+
+      .particular-table {
+        width: 100%;
+        margin-bottom: 256px;
+        font-size: 18px;
+      }
+
+      .particular-table th {
+        text-align: center;
+        font-weight: 800;
+        padding: 8px;
+        background-color: whitesmoke;
+      }
+
+      .particular-table td {
+        padding: 8px;
+      }
+
+      .table-col-serial {
+        width: 5%;
+      }
+      
+      .table-col-tax {
+        width: 12%;
+      }
+
+      .table-col-quantity {
+        width: 10%;
+      }
+      
+      .table-col-rate {
+        width: 10%;
+      }
+      
+      .table-col-amount {
+        width: 10%;
+      }
+
+      .tax-peritem-total-field {
+        text-align: right;
+        font-weight: 800;
+        padding-right: 64px !important;
+      }
+
+      .signature-details {
+        text-align: right;
+      }
+
+      .signature-container {
+        width: 200px;
+        height: 100px;
+        margin-left: auto;
+        text-align: right;
+      }
+
+      .signature-img {
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      .signature-details, .terms-details {
+        width: 49.5%;
+        display: inline-block;
+        vertical-align: bottom;
+      }
+
+      .text-right {
+        text-align: right;
+      }
+
+      .text-left {
+        text-align: left;
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      .clearfix::after {
+        content: "";
+        clear: both;
+        display: table;
+      }
+
+      .address-line, .address-contact {
+        float: left;
+        margin: 0;
+        font-size: 0.9em;
+      }
+
+      .address-line {
+        width: 80%;
+      }
+
+      .address-contact {
+        text-align: right;
+        width: 20%;
+      }
+
+      .total-container {
+        text-align: right;
+      }
+
+      .total-container p:first-child {
+        width: 20%;
+      }
+
+      .total-container p {
+        margin: 0;
+        margin-bottom: 8px;
+        width: 8.6%;
+        padding-left: 6px;
+        padding-right: 6px;
+        display: inline-block;
+      }
+
+      .total-container p:last-child {
+        text-align: left;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="invoice">
+      <% var showTax = invoice.isTaxable; %>
+      <% var organization = invoice.organization; %>
+      <% var organizationBranch = invoice.organizationBranch; %>
+      <% var client = invoice.client; %>
+      <% var clientBranch = invoice.clientBranch; %>
+      <% var isSameState; 
+         if(!clientBranch) {
+            isSameState = true;
+         } else {
+            isSameState = organizationBranch.state.id === clientBranch.state.id;
+         }
+      %>
+
+      <div class="invoice-body">
+        <% if(organization.logo) { %>
+          <div class="logo-container">
+            <img src=<%= organization.logo %> />
+          </div>
+          <% } else { %>
+          <h1 class="logo-title"><%= organization.name %></h1>
+          <% } %>
+
+        <div class="clearfix-container mb-32">
+          <div class="col-70">
+            <p class="invoice-title"><%= showTax ? 'Tax Invoice' : 'Invoice' %></p>
+            <p class="bold"><%= client.name %></p>
+            <p class="mw-300"><%= client.address %></p>
+            <p><%= clientBranch.state.name %></p>
+            <% if(clientBranch.gstNumber) { %>
+              <p class="bold">Recepient's GSTIN</p>
+              <p><%= clientBranch.gstNumber %></p>
+            <% } %>
+          </div>
+          <div class="col-15">
+            <p class="bold">Invoice Date</p>
+            <p><%= moment(invoice.raisedDate).format('DD MMM YYYY') %></p>
+            <p class="bold">Invoice Number</p>
+            <p><%= invoice.serial || 'n/a' %></p>
+            <p class="bold">GST IN</p>
+            <p><%= organizationBranch.gstNumber || '-' %></p>
+            <p class="bold">PAN</p>
+            <p><%= organization.pan || '-' %></p>
+          </div>
+          <div class="col-15">
+            <p class="bold"><%= organization.name %></p>
+            <% if(organizationBranch.addressLineOne) { %>
+              <p><%= organization.addressLineOne %></p>
+            <% } %>
+            <p><%= organizationBranch.state.name %></p>
+            <p><%= organization.phone %></p>
+            <p><%= organization.email %></p>
+          </div>
+        </div>
+
+        <table class="particular-table">
+          <colgroup>
+            <col class="table-col-serial" span="1" />
+            <col class="table-col-description" span="1" />
+            <% if(invoice.includeQuantity) { %>
+              <col class="table-col-quantity" span="1" />
+              <col class="table-col-rate" span="1" />
+              <col class="table-col-amount" span="1" />
+            <% } else { %>
+              <col class="table-col-amount" span="1" />
+            <% } %>
+            <% if(invoice.taxPerItem && showTax) { %>
+              <% if(isSameState) { %>
+                <col class="table-col-tax" span="1" />
+                <col class="table-col-tax" span="1" />
+              <% } else { %>
+                <col class="table-col-tax" span="1" />
+              <% } %>
+              <col class="table-col-amount" span="1" />
+            <% } %>
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Sr.</th>
+              <th>Description</th>
+              <% if(invoice.includeQuantity) { %>
+                <th>Rate</th>
+                <th>Quantity</th>
+                <th>Amount</th>
+              <% } else { %>
+                <th>Amount</th>
+              <% } %>
+              <% if(invoice.taxPerItem && showTax) { %>
+                <% if(isSameState) { %>
+                  <th>CGST</th>
+                  <th>SGST</th>
+                <% } else { %>
+                  <th>IGST</th>
+                <% } %>
+                <th>Total</th>
+              <% } %>
+            </tr>
+          </thead>
+          <tbody>
+            <% for(var i = 0; i < invoice.particulars.length; i++) { %>
+            <% var particular = invoice.particulars[i]; %>
+              <tr>
+                <td class="text-center"><%= i + 1 %></td>
+                <td><%= particular.details.name %></td>
+                <% if(invoice.includeQuantity) { %>
+                  <td class="text-right">
+                    <%= (particular.taxableAmount / particular.quantity).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                  </td>
+                  <td class="text-right"><%= particular.quantity %></td>
+                  <td class="text-right"><%= particular.taxableAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></td>
+                <% } else { %>
+                  <td class="text-right"><%= particular.taxableAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></td>
+                <% } %>
+                <% if(invoice.taxPerItem && showTax) { %>
+
+                  <% for(var i = 0; i < particular.taxes.length; i++) { %>
+                    <% var particularTax = particular.taxes[i]; %>
+                    <td class="relative text-right">
+                      <span class="cell-small text-left">@<%= particularTax.taxType.rate %>%</span>
+                      <%= particularTax.amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                    </td>
+                  <% } %>
+
+                  
+                  <!-- <% if(isSameState) { %>
+
+                    <td class="relative text-right">
+                    
+
+                    <% if(invoice.cgstRate !== 0) { %>
+                      <span class="cell-small text-left">@<%= particular.cgstRate %>%</span>
+                      <%= particular.cgstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                    <% } else { %>
+                      -
+                    <% } %>
+                    </td>
+                    <td class="relative text-right">
+                    <% if(invoice.sgstRate !== 0) { %>
+                      <span class="cell-small text-left">@<%= particular.sgstRate %>%</span>
+                      <%= particular.sgstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                    <% } else { %>
+                      -
+                    <% } %>
+                    
+                    </td>
+                  <% } else { %>
+                    <td class="relative text-right">
+                    <% if(invoice.igstRate !== 0) { %>
+                      <span class="cell-small text-left">@<%= particular.igstRate %>%</span>
+                      <%= particular.igstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                    <% } else { %>
+                      -
+                    <% } %>
+                    </td>
+                  <% } %> -->
+
+
+                  <td class="text-right"><%= particular.total.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></td>
+                <% } %>
+              </tr>
+            <% } %>
+            <% if (invoice.taxPerItem) { %>
+              <tr>
+                <td class="text-right"></td>
+                <% if(invoice.includeQuantity) { %>
+                  <td class="text-right"></td>
+                  <td class="text-right"></td>
+                <% } %>
+                <td class="text-right"><b>Total</b></td>
+                <td class="text-right"><b>
+                  <%= invoice.taxableAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                </b></td>
+                <% if(showTax) { %>
+
+                  <% for(var i = 0; i < particular.taxes.length; i++) { %>
+                    <% var particularTax = particular.taxes[i]; %>
+                    <td class="text-right">
+                      <b><%= particularTax.amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></b>
+                    </td>
+                  <% } %>
+
+                  <!-- <% if(isSameState) { %>
+                    <td class="text-right"><b><%= invoice.cgstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></b></td>
+                    <td class="text-right"><b><%= invoice.sgstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></b></td>
+                  <% } else { %>
+                    <td class="text-right"><b><%= invoice.igstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></b></td>
+                  <% } %> -->
+
+
+                  <td class="text-right"><b><%= invoice.total.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></b></td>
+                <% } %>
+
+              </tr>
+            <% } else { %>
+              <% if(invoice.discountAmount) { %>
+                <tr>
+                  <td class="text-right"></td>
+                  <% if(invoice.includeQuantity) { %>
+                    <td class="text-right"></td>
+                    <td class="text-right"></td>
+                  <% } %>
+                  <td class="text-right">Total before discount</td>
+                  <td class="text-right">
+                    <%= invoice.amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-right"></td>
+                  <% if(invoice.includeQuantity) { %>
+                    <td class="text-right"></td>
+                    <td class="text-right"></td>
+                  <% } %>
+                  <td class="text-right">Discount @<%= invoice.discountRate %>%</td>
+                  <td class="text-right">
+                    -<%= invoice.discountAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                  </td>
+                </tr>
+              <% } %>
+              <tr>
+                <td class="text-right"></td>
+                <% if(invoice.includeQuantity) { %>
+                  <td class="text-right"></td>
+                  <td class="text-right"></td>
+                <% } %>
+                <td class="text-right">Total</td>
+                <td class="text-right">
+                  <%= invoice.taxableAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                </td>
+              </tr>
+              <% if(showTax) { %>
+
+
+                <% for(var i = 0; i < invoice.taxes.length; i++) { %>
+                  <% var invoiceTax = invoice.taxes[i]; %>
+                  <tr>
+                    <td class="text-right"></td>
+                    <% if(invoice.includeQuantity) { %>
+                      <td class="text-right"></td>
+                      <td class="text-right"></td>
+                    <% } %>
+                    <td class="text-right"><%= invoiceTax.taxType.name %></td>
+                    <td class="text-right">
+                      <%= invoiceTax.amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                    </td>
+                  </tr>
+                <% } %>
+
+                <!-- <% if(isSameState) { %>
+                  <tr>
+                    <td class="text-right"></td>
+                    <% if(invoice.includeQuantity) { %>
+                      <td class="text-right"></td>
+                      <td class="text-right"></td>
+                    <% } %>
+                    <td class="text-right">CGST @<%= invoice.cgstRate %>%</td>
+                    <td class="text-right">
+                      <%= invoice.cgstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-right"></td>
+                    <% if(invoice.includeQuantity) { %>
+                      <td class="text-right"></td>
+                      <td class="text-right"></td>
+                    <% } %>
+                    <td class="text-right">SGST @<%= invoice.sgstRate %>%</td>
+                    <td class="text-right">
+                      <%= invoice.sgstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                    </td>
+                  </tr>
+                <% } else { %>
+                  <tr>
+                    <td class="text-right"></td>
+                    <% if(invoice.includeQuantity) { %>
+                      <td class="text-right"></td>
+                      <td class="text-right"></td>
+                    <% } %>
+                    <td class="text-right">IGST @<%= invoice.igstRate %>%</td>
+                    <td class="text-right">
+                      <%= invoice.igstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                    </td>
+                  </tr>
+                <% } %> -->
+
+              <% } %>
+              <tr>
+                <td class="text-right"></td>
+                <% if(invoice.includeQuantity) { %>
+                  <td class="text-right"></td>
+                  <td class="text-right"></td>
+                <% } %>
+                <td class="text-right"><b>Grand Total</b></td>
+                <td class="text-right"><b>
+                  <%= invoice.total.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                </b></td>
+                <!-- <td class="text-right"><b><%= invoice.grandTotal.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></b></td> -->
+              </tr>
+            <% } %>
+            
+          </tbody>
+        </table>
+
+        <% if(invoice.taxPerItem && invoice.discountRate) { %>
+          <div>
+            <p style="margin-bottom: 32px;">Discount given at <%= invoice.discountRate %>% on <%= invoice.amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %> = <%= invoice.discountAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>.</p>
+          </div>
+        <% } %>
+
+        <div class="clearfix-container">
+          <div class="col-35">
+            <% if(organization.invoicePreferences.defaultTerms) { %>
+              <p class="bold mb-8">Terms and Conditions</p>
+              <pre class="mb-32"><%- organization.invoicePreferences.defaultTerms %></pre>
+            <% } %>
+
+            <!-- <% if(
+              organization.bankBeneficiaryName
+              || organization.bankName
+              || organization.bankAccountNumber
+              || organization.bankIFSC
+              || organization.bankAccountType
+            ) { %>
+            <p class="bold">Bank Details</p>
+            <% } %>
+            <% if(organization.bankBeneficiaryName) { %>
+              <p class="m-0"><span class="bold">Beneficiary Name: </span><%= organization.bankBeneficiaryName %></p>
+            <% } %>
+            <% if(organization.bankName) { %>
+              <p class="m-0"><span class="bold">Bank Name: </span><%= organization.bankName %></p>
+            <% } %>
+            <% if(organization.bankAccountNumber) { %>
+            <p class="m-0"><span class="bold">A/C Number: </span><%= organization.bankAccountNumber %></p>
+            <% } %>
+            <% if(organization.bankIFSC) { %>
+              <p class="m-0"><span class="bold">IFSC: </span><%= organization.bankIFSC %></p>
+            <% } %>
+            <% if(organization.bankAccountType) { %>
+              <p class="m-0"><span class="bold">A/C Type: </span><%= organization.bankAccountType %></p>
+            <% } %> -->
+
+          </div>
+          <div class="col-25 float-right">
+            <div class="signature-container">
+              <% if(organization.signature) { %>
+              <img class="signature-img" src=<%= organization.signature %> />
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+
+
+
+

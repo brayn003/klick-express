@@ -120,6 +120,27 @@ InvoiceSchema.statics.getNewSerial = async function (params) {
   return `${organization.code}/${branch.code}/${count + 1}`;
 };
 
+InvoiceSchema.statics.generatePdf = async function (id) {
+  const invoice = await this.findById(id)
+    .populate('organization')
+    .populate('client')
+    .populate({
+      path: 'organizationBranch',
+      populate: [
+        { path: 'state' },
+        { path: 'city' },
+      ],
+    })
+    .populate({
+      path: 'clientBranch',
+      populate: [
+        { path: 'state' },
+        { path: 'city' },
+      ],
+    });
+  console.log('invoice', invoice);
+};
+
 InvoiceSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('Invoice', InvoiceSchema);
