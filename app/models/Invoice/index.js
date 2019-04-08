@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
 const padStart = require('lodash/padStart');
-const fs = require('fs');
-const path = require('path');
-const ejs = require('ejs');
+
+const { renderHTML } = require('~helpers/template-service');
 // const Particular = require('~models/Particular');
 // const InvoiceService = require('~helpers/invoice-service');
 // const { validateParticulars } = require('~helpers/tax-service');
@@ -123,7 +122,7 @@ InvoiceSchema.statics.getNewSerial = async function (params) {
   return `${organization.code}/${branch.code}/${padStart(count + 1, 6, 0)}`;
 };
 
-InvoiceSchema.statics.generatePdf = async function (id) {
+InvoiceSchema.statics.generateHTML = async function (id) {
   const invoice = await this.findById(id)
     .populate('organization')
     .populate('client')
@@ -139,11 +138,8 @@ InvoiceSchema.statics.generatePdf = async function (id) {
     .populate('particulars.taxes.taxType')
     .populate('taxes.taxType');
 
-  const template = fs.readFileSync(path.join(__dirname, '../..', 'view/templates/invoice/default.ejs'), 'utf8');
-  const html = ejs.render(template, {
-    invoice,
-  });
-  return html;
+  const template = invoice.organization.invoicePreferences.defaultTemplate;
+  return renderHTML(`templates/invoice/${template}`, { invoice });
 };
 
 InvoiceSchema.plugin(mongoosePaginate);
