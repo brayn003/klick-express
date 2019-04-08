@@ -33,6 +33,7 @@ const schemaCheck = checkSchema({
   'particulars.*.taxTypes.*': { isMongoId: true },
   dueDate: { isISO8601: true, optional: true },
   isUnderLUT: { isBoolean: true, optional: true },
+  client: { isMongoId: true, optional: true },
   clientBranch: { isMongoId: true, optional: true },
   inlineComment: { isString: true, optional: true },
   attachements: { optional: true },
@@ -54,6 +55,7 @@ async function controller(req, res) {
     particulars: bodyParticulars,
     dueDate = null,
     isUnderLUT = false,
+    client: clientId = null,
     clientBranch: clientBranchId = null,
     inlineComment = '',
     attachements = null,
@@ -67,9 +69,15 @@ async function controller(req, res) {
   const particulars = await Particular.getOrAdd(bodyParticulars);
   const orgBranch = await Branch.getById(orgBranchId);
   const organization = await Organization.getById(orgBranch.organization);
+
+  let client = {};
   let clientBranch = {};
-  if (clientBranchId) {
+  if (!clientId && clientBranchId) {
     clientBranch = await Branch.getById(clientBranchId);
+    client = await Organization.getById(clientBranch.id);
+  } else if ((clientId && !clientBranchId) || (clientId && clientBranchId)) {
+    client = await Organization.getById(clientId);
+    clientBranch = await Branch.getById(client.defaultBranch);
   }
 
   let generateSerial = bodyGenerateSerial;
@@ -92,7 +100,7 @@ async function controller(req, res) {
   const invoiceInstance = new InvoiceService({
     particulars,
     isTaxable,
-    isSameState: orgBranch === clientBranch,
+    isSameState: orgBranch.state === clientBranch.state,
     taxInclusion,
     discountAmount,
     discountRate,
@@ -103,7 +111,7 @@ async function controller(req, res) {
   const invoice = await Invoice.create({
     organization: organization.id,
     organizationBranch: orgBranchId,
-    client: clientBranch.organization,
+    client: client.id,
     clientBranch: clientBranch.id,
     raisedDate,
     dueDate,
