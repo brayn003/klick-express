@@ -74,7 +74,15 @@ async function up(con) {
 
 
   await bulkOrg.execute();
-  await bulkBranch.execute();
+  const bulkBranchResponse = await bulkBranch.execute();
+  const branches = await branchCol
+    .find({ _id: { $in: bulkBranchResponse.getInsertedIds().map(o => o._id) } })
+    .toArray();
+  const bulkOrg2 = orgCol.initializeUnorderedBulkOp();
+  branches.forEach((branch) => {
+    bulkOrg2.find({ _id: branch.organization }).updateOne({ $set: { defaultBranch: branch._id } });
+  });
+  await bulkOrg2.execute();
   await bulkBank.execute();
   await bulkOrgUser.execute();
   await roleCol.drop();

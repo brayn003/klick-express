@@ -16,7 +16,9 @@ async function controller(req, res) {
     }
     return res.json({ verified: false });
   } catch (e) {
-    return res.status(401).json({ messages: [e instanceof Error ? e.toString() : e] });
+    return res
+      .status(401)
+      .json({ verified: false, messages: [e instanceof Error ? e.toString() : e] });
   }
 }
 
