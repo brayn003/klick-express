@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
+const padStart = require('lodash/padStart');
 // const Particular = require('~models/Particular');
 // const InvoiceService = require('~helpers/invoice-service');
 // const { validateParticulars } = require('~helpers/tax-service');
@@ -113,11 +114,10 @@ InvoiceSchema.statics.getNewSerial = async function (params) {
   const { organization, branch } = params;
   const count = await this.count({
     organization: organization.id,
-    branch: branch.id,
-    serial: { '!=': null },
+    organizationBranch: branch.id,
+    serial: { $ne: null },
   }).sort('-createdAt');
-
-  return `${organization.code}/${branch.code}/${count + 1}`;
+  return `${organization.code}/${branch.code}/${padStart(count + 1, 6, 0)}`;
 };
 
 InvoiceSchema.statics.generatePdf = async function (id) {

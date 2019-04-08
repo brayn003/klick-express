@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const keyBy = require('lodash/keyBy');
+const TaxType = require('~models/TaxType');
 
 const ParticularSchema = new mongoose.Schema({
   organization: { type: 'ObjectId', ref: 'Organization' },
@@ -16,7 +18,7 @@ const ParticularSchema = new mongoose.Schema({
   collection: 'particular',
 });
 
-ParticularSchema.statics.getOrAdd = async function (particulars, createdBy = null) {
+ParticularSchema.statics.getOrAdd = async function (particulars) {
   const particularDetails = particulars.map((particular) => {
     if (typeof particular.details === 'string') {
       return particular.details;
@@ -27,35 +29,48 @@ ParticularSchema.statics.getOrAdd = async function (particulars, createdBy = nul
     throw new Error('Not a valid value for detials');
   });
 
-  const oldParticularIds = particularDetails
-    .filter(pd => typeof pd === 'string');
-  const oldParticulars = await this.find({ _id: { $in: oldParticularIds } });
-
-  const newParticularDetails = particularDetails
-    .filter(pd => typeof pd === 'object');
-  const newParticulars = await this.createParticulars(newParticularDetails, createdBy);
-
-  return particulars
-    .map((particular) => {
-      const { details } = particular;
-      if (typeof details === 'string') {
-        return {
-          ...particular,
-          details: oldParticulars.find(p => p.id === details).id,
-        };
+  const allTaxTypeIds = particulars
+    .reduce((agg, particular) => (particular.taxes || []).reduce((agg2, tax) => {
+      if (agg2.indexOf(tax.taxType) === -1) {
+        return agg2.concat(tax.taxType);
       }
-      if (typeof details === 'object') {
-        return {
-          ...particular,
-          details: newParticulars.shift(),
-        };
-      }
-      throw new Error('Not a valid value');
-    });
+      return agg2;
+    }, agg), []);
+
+  const allTaxTypes = await TaxType.find({ _id: { $in: allTaxTypeIds } });
+
+  if (allTaxTypeIds.length !== allTaxTypes.length) {
+    throw new Error('Taxes don\'t exist');
+  }
+
+  const taxTypesMap = keyBy(allTaxTypes, '_id');
+
+  const newParticularDetails = particularDetails.filter(pd => typeof pd === 'object');
+  const newParticulars = await this.createParticulars(newParticularDetails);
+  const newParticularIds = newParticulars.map(p => p.id);
+
+  const allParticularIds = particulars.map((particular) => {
+    const { details } = particular;
+    if (typeof details === 'string') return details;
+    if (typeof details === 'object') return newParticularIds.shift();
+    throw new Error('Not a valid value');
+  });
+  const allParticulars = await this.find({ _id: { $in: allParticularIds } });
+
+  const finalParticulars = allParticulars.map((details, index) => ({
+    ...particulars[index],
+    taxes: particulars[index].taxes.map(tax => ({
+      ...tax,
+      taxType: taxTypesMap[tax.taxType],
+    })),
+    details,
+  }));
+
+  return finalParticulars;
 };
 
-ParticularSchema.statics.createParticulars = async function (particulars, createdBy = null) {
-  const updatedParticulars = particulars.map(p => ({ ...p, createdBy }));
+ParticularSchema.statics.createParticulars = async function (particulars) {
+  const updatedParticulars = particulars.map(p => ({ ...p }));
   const newParticulars = await this.insertMany(updatedParticulars);
   return newParticulars;
 };

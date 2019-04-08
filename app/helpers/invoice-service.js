@@ -48,7 +48,7 @@ class InvoiceService {
     }
 
     if (this.taxInclusion === 'inclusive') {
-      const taxRate = sumBy(particular.taxTypes, 'rate');
+      const taxRate = sumBy(particular.taxes, 'taxType.rate');
       return (discountAmount * 100) / (100 + taxRate);
     }
 
@@ -61,7 +61,7 @@ class InvoiceService {
 
   /* eslint-disable */
   getParticularOverallTaxRate(particular) {
-    return sumBy(particular.taxTypes, 'rate');
+    return sumBy(particular.taxes, 'taxType.rate');
   }
   /* eslint-enable */
 
@@ -78,7 +78,7 @@ class InvoiceService {
 
     if (this.isTaxable && this.taxInclusion === 'inclusive') {
       const total = (particular.quantity * particular.rate);
-      const taxRate = sumBy(particular.taxTypes, 'rate');
+      const taxRate = sumBy(particular.taxes, 'taxType.rate');
       const taxableAmount = (total * 100) / (taxRate + 100);
       return taxableAmount + discountAmount;
     }
@@ -91,7 +91,7 @@ class InvoiceService {
   }
 
   getParticularTaxAmount(particular) {
-    const taxRate = sumBy(particular.taxTypes, 'rate');
+    const taxRate = sumBy(particular.taxes, 'taxType.rate');
     return this.getParticularTaxableAmount(particular) * (taxRate / 100);
   }
 
@@ -101,8 +101,10 @@ class InvoiceService {
 
   getParticularTaxes(particular) {
     const taxableAmount = this.getParticularTaxableAmount(particular);
-    return (particular.taxTypes || [])
-      .map(taxType => ({ taxType, amount: (taxType.rate / 100) * taxableAmount }));
+    return (particular.taxes || [])
+      .map(({ taxType }) => ({
+        taxType, amount: (taxType.rate / 100) * taxableAmount,
+      }));
   }
 
   getAggregatedParticularTaxes() {

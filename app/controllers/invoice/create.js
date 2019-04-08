@@ -5,6 +5,7 @@ const Particular = require('~models/Particular');
 const Branch = require('~models/Organization/Branch');
 const Organization = require('~models/Organization');
 const Invoice = require('~models/Invoice');
+const { transformError } = require('~helpers/error-handlers');
 
 const schemaCheck = checkSchema({
   organizationBranch: { isMongoId: true },
@@ -65,96 +66,102 @@ async function controller(req, res) {
     tdsAmount,
   } = body;
 
+  try {
+    const particulars = await Particular.getOrAdd(bodyParticulars);
+    const orgBranch = await Branch.getById(orgBranchId);
+    if (!orgBranch) {
+      throw new Error('Organization branch does not exist');
+    }
+    const organization = await Organization.getById(orgBranch.organization);
 
-  const particulars = await Particular.getOrAdd(bodyParticulars);
-  const orgBranch = await Branch.getById(orgBranchId);
-  const organization = await Organization.getById(orgBranch.organization);
+    let client = {};
+    let clientBranch = {};
+    if (!clientId && clientBranchId) {
+      clientBranch = await Branch.getById(clientBranchId);
+      client = await Organization.getById(clientBranch.id);
+    } else if ((clientId && !clientBranchId) || (clientId && clientBranchId)) {
+      client = await Organization.getById(clientId);
+      clientBranch = await Branch.getById(client.defaultBranch);
+    }
 
-  let client = {};
-  let clientBranch = {};
-  if (!clientId && clientBranchId) {
-    clientBranch = await Branch.getById(clientBranchId);
-    client = await Organization.getById(clientBranch.id);
-  } else if ((clientId && !clientBranchId) || (clientId && clientBranchId)) {
-    client = await Organization.getById(clientId);
-    clientBranch = await Branch.getById(client.defaultBranch);
-  }
+    let generateSerial = bodyGenerateSerial;
+    if (organization.invoicePreferences.autoSerial) {
+      generateSerial = true;
+    }
 
-  let generateSerial = bodyGenerateSerial;
-  if (organization.invoicePreferences.autoSerial) {
-    generateSerial = true;
-  }
+    let serial = null;
+    if (generateSerial) {
+      serial = await Invoice.getNewSerial({ organization, branch: orgBranch });
+    }
 
-  let serial = null;
-  if (generateSerial) {
-    serial = await Invoice.getNewSerial(organization, orgBranch);
-  }
-
-  const isTaxable = (
-    !!orgBranch.gstNumber
+    const isTaxable = (
+      !!orgBranch.gstNumber
     && !isUnderLUT
     && !organization.isUnderComposition
     && generateSerial
-  );
+    );
 
-  const invoiceInstance = new InvoiceService({
-    particulars,
-    isTaxable,
-    isSameState: orgBranch.state === clientBranch.state,
-    taxInclusion,
-    discountAmount,
-    discountRate,
-    tdsRate,
-    tdsAmount,
-  });
+    const invoiceInstance = new InvoiceService({
+      particulars,
+      isTaxable,
+      isSameState: orgBranch.state === clientBranch.state,
+      taxInclusion,
+      discountAmount,
+      discountRate,
+      tdsRate,
+      tdsAmount,
+    });
 
-  const invoice = await Invoice.create({
-    organization: organization.id,
-    organizationBranch: orgBranchId,
-    client: client.id,
-    clientBranch: clientBranch.id,
-    raisedDate,
-    dueDate,
-    isGSTCompliant: !!orgBranch.gstNumber,
-    isUnderComposition: organization.isUnderComposition,
-    isUnderLUT,
-    isTaxable,
-    currency,
-    taxPerItem: organization.invoicePreferences.taxPerItem,
-    includeQuantity: organization.invoicePreferences.includeQuantity,
-    taxInclusion,
-    serial,
-    inlineComment,
-    attachements,
-    particulars: particulars.map(particular => ({
-      details: particular.details.id,
-      rate: particular.rate,
-      quantity: particular.quantity,
-      discountRate: invoiceInstance.getParticularDiscountRate(particular),
-      discountAmount: invoiceInstance.getParticularDiscountAmount(particular),
-      taxes: invoiceInstance.getParticularTaxes(particular),
-      overallTaxRate: invoiceInstance.getParticularOverallTaxRate(particular),
-      taxAmount: invoiceInstance.getParticularTaxAmount(particular),
-      amount: invoiceInstance.getParticularAmount(particular),
-      taxableAmount: invoiceInstance.getParticularTaxableAmount(particular),
-      total: invoiceInstance.getParticularTotal(particular),
-    })),
-    discountRate,
-    discountAmount: invoiceInstance.getInvoiceDiscountAmount(),
-    taxes: invoiceInstance.getAggregatedParticularTaxes(),
-    overallTaxRate: invoiceInstance.getOverallTaxRate(),
-    taxAmount: invoiceInstance.getTaxAmount(),
-    amount: invoiceInstance.getAmount(),
-    taxableAmount: invoiceInstance.getTaxableAmount(),
-    total: invoiceInstance.getTotal(),
-    tdsRate: invoiceInstance.getTdsRate(),
-    tdsAmount: invoiceInstance.getTdsAmount(),
-    amountReceivable: invoiceInstance.getAmountReceivable(),
-    roundedTotal: invoiceInstance.getRoundedTotal(),
-    roundedAmountReceivable: invoiceInstance.getRoundedAmountReceivable(),
-  });
+    const invoice = await Invoice.create({
+      organization: organization.id,
+      organizationBranch: orgBranchId,
+      client: client.id,
+      clientBranch: clientBranch.id,
+      raisedDate,
+      dueDate,
+      isGSTCompliant: !!orgBranch.gstNumber,
+      isUnderComposition: organization.isUnderComposition,
+      isUnderLUT,
+      isTaxable,
+      currency,
+      taxPerItem: organization.invoicePreferences.taxPerItem,
+      includeQuantity: organization.invoicePreferences.includeQuantity,
+      taxInclusion,
+      serial,
+      inlineComment,
+      attachements,
+      particulars: particulars.map(particular => ({
+        details: particular.details.id,
+        rate: particular.rate,
+        quantity: particular.quantity,
+        discountRate: invoiceInstance.getParticularDiscountRate(particular),
+        discountAmount: invoiceInstance.getParticularDiscountAmount(particular),
+        taxes: invoiceInstance.getParticularTaxes(particular),
+        overallTaxRate: invoiceInstance.getParticularOverallTaxRate(particular),
+        taxAmount: invoiceInstance.getParticularTaxAmount(particular),
+        amount: invoiceInstance.getParticularAmount(particular),
+        taxableAmount: invoiceInstance.getParticularTaxableAmount(particular),
+        total: invoiceInstance.getParticularTotal(particular),
+      })),
+      discountRate,
+      discountAmount: invoiceInstance.getInvoiceDiscountAmount(),
+      taxes: invoiceInstance.getAggregatedParticularTaxes(),
+      overallTaxRate: invoiceInstance.getOverallTaxRate(),
+      taxAmount: invoiceInstance.getTaxAmount(),
+      amount: invoiceInstance.getAmount(),
+      taxableAmount: invoiceInstance.getTaxableAmount(),
+      total: invoiceInstance.getTotal(),
+      tdsRate: invoiceInstance.getTdsRate(),
+      tdsAmount: invoiceInstance.getTdsAmount(),
+      amountReceivable: invoiceInstance.getAmountReceivable(),
+      roundedTotal: invoiceInstance.getRoundedTotal(),
+      roundedAmountReceivable: invoiceInstance.getRoundedAmountReceivable(),
+    });
 
-  return res.status(201).json(invoice);
+    return res.status(201).json(invoice);
+  } catch (err) {
+    return res.status(400).json(transformError(err));
+  }
 }
 
 module.exports = [validateParams(schemaCheck), controller];
