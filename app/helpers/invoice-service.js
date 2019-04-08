@@ -124,6 +124,14 @@ class InvoiceService {
     return Object.values(taxesMap);
   }
 
+  getOverallTaxes() {
+    const aggregatedParticularTaxes = this.getAggregatedParticularTaxes();
+    return aggregatedParticularTaxes.map(tax => ({
+      ...tax,
+      amount: tax.amount - (this.getInvoiceDiscountAmount() * (tax.taxType.rate / 100)),
+    }));
+  }
+
   getTdsAmount() {
     if (!isNil(this.tdsAmount)) {
       return this.tdsAmount;

@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
 const padStart = require('lodash/padStart');
+const fs = require('fs');
+const path = require('path');
+const ejs = require('ejs');
 // const Particular = require('~models/Particular');
 // const InvoiceService = require('~helpers/invoice-service');
 // const { validateParticulars } = require('~helpers/tax-service');
@@ -126,19 +129,21 @@ InvoiceSchema.statics.generatePdf = async function (id) {
     .populate('client')
     .populate({
       path: 'organizationBranch',
-      populate: [
-        { path: 'state' },
-        { path: 'city' },
-      ],
+      populate: ['state', 'city'],
     })
     .populate({
       path: 'clientBranch',
-      populate: [
-        { path: 'state' },
-        { path: 'city' },
-      ],
-    });
-  return invoice;
+      populate: ['state', 'city'],
+    })
+    .populate('particulars.details')
+    .populate('particulars.taxes.taxType')
+    .populate('taxes.taxType');
+
+  const template = fs.readFileSync(path.join(__dirname, '../..', 'view/templates/invoice/default.ejs'), 'utf8');
+  const html = ejs.render(template, {
+    invoice,
+  });
+  return html;
 };
 
 InvoiceSchema.plugin(mongoosePaginate);

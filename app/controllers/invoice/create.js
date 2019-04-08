@@ -112,6 +112,8 @@ async function controller(req, res) {
       tdsAmount,
     });
 
+    console.log(invoiceInstance.getOverallTaxes());
+
     const invoice = await Invoice.create({
       organization: organization.id,
       organizationBranch: orgBranchId,
@@ -145,7 +147,7 @@ async function controller(req, res) {
       })),
       discountRate,
       discountAmount: invoiceInstance.getInvoiceDiscountAmount(),
-      taxes: invoiceInstance.getAggregatedParticularTaxes(),
+      taxes: invoiceInstance.getOverallTaxes(),
       overallTaxRate: invoiceInstance.getOverallTaxRate(),
       taxAmount: invoiceInstance.getTaxAmount(),
       amount: invoiceInstance.getAmount(),

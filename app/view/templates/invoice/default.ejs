@@ -308,10 +308,10 @@
       <% var showTax = invoice.isTaxable; %>
       <% var organization = invoice.organization; %>
       <% var organizationBranch = invoice.organizationBranch; %>
-      <% var client = invoice.client; %>
-      <% var clientBranch = invoice.clientBranch; %>
+      <% var client = invoice.client || {}; %>
+      <% var clientBranch = invoice.clientBranch || {}; %>
       <% var isSameState; 
-         if(!clientBranch) {
+         if(Object.keys(clientBranch).length === 0) {
             isSameState = true;
          } else {
             isSameState = organizationBranch.state.id === clientBranch.state.id;
@@ -331,8 +331,17 @@
           <div class="col-70">
             <p class="invoice-title"><%= showTax ? 'Tax Invoice' : 'Invoice' %></p>
             <p class="bold"><%= client.name %></p>
-            <p class="mw-300"><%= client.address %></p>
-            <p><%= clientBranch.state.name %></p>
+            <% if(clientBranch.addressLineOne) { %>
+              <p><%= clientBranch.addressLineOne %></p>
+            <% } %>
+            <% if(clientBranch.addressLineOne) { %>
+              <p><%= clientBranch.addressLineOne %></p>
+            <% } %>
+            <% if(clientBranch.state && clientBranch.state.name) { %>
+              <p><%= clientBranch.state.name %></p>
+            <% } %>
+
+
             <% if(clientBranch.gstNumber) { %>
               <p class="bold">Recepient's GSTIN</p>
               <p><%= clientBranch.gstNumber %></p>
@@ -340,7 +349,7 @@
           </div>
           <div class="col-15">
             <p class="bold">Invoice Date</p>
-            <p><%= moment(invoice.raisedDate).format('DD MMM YYYY') %></p>
+            <p><%= invoice.raisedDate %></p>
             <p class="bold">Invoice Number</p>
             <p><%= invoice.serial || 'n/a' %></p>
             <p class="bold">GST IN</p>
@@ -351,7 +360,10 @@
           <div class="col-15">
             <p class="bold"><%= organization.name %></p>
             <% if(organizationBranch.addressLineOne) { %>
-              <p><%= organization.addressLineOne %></p>
+              <p><%= organizationBranch.addressLineOne %></p>
+            <% } %>
+            <% if(organizationBranch.addressLineTwo) { %>
+              <p><%= organizationBranch.addressLineTwo %></p>
             <% } %>
             <p><%= organizationBranch.state.name %></p>
             <p><%= organization.phone %></p>
@@ -426,45 +438,11 @@
                       <%= particularTax.amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
                     </td>
                   <% } %>
-
-                  
-                  <!-- <% if(isSameState) { %>
-
-                    <td class="relative text-right">
-                    
-
-                    <% if(invoice.cgstRate !== 0) { %>
-                      <span class="cell-small text-left">@<%= particular.cgstRate %>%</span>
-                      <%= particular.cgstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
-                    <% } else { %>
-                      -
-                    <% } %>
-                    </td>
-                    <td class="relative text-right">
-                    <% if(invoice.sgstRate !== 0) { %>
-                      <span class="cell-small text-left">@<%= particular.sgstRate %>%</span>
-                      <%= particular.sgstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
-                    <% } else { %>
-                      -
-                    <% } %>
-                    
-                    </td>
-                  <% } else { %>
-                    <td class="relative text-right">
-                    <% if(invoice.igstRate !== 0) { %>
-                      <span class="cell-small text-left">@<%= particular.igstRate %>%</span>
-                      <%= particular.igstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
-                    <% } else { %>
-                      -
-                    <% } %>
-                    </td>
-                  <% } %> -->
-
-
                   <td class="text-right"><%= particular.total.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></td>
                 <% } %>
               </tr>
             <% } %>
+
             <% if (invoice.taxPerItem) { %>
               <tr>
                 <td class="text-right"></td>
@@ -484,15 +462,6 @@
                       <b><%= particularTax.amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></b>
                     </td>
                   <% } %>
-
-                  <!-- <% if(isSameState) { %>
-                    <td class="text-right"><b><%= invoice.cgstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></b></td>
-                    <td class="text-right"><b><%= invoice.sgstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></b></td>
-                  <% } else { %>
-                    <td class="text-right"><b><%= invoice.igstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></b></td>
-                  <% } %> -->
-
-
                   <td class="text-right"><b><%= invoice.total.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></b></td>
                 <% } %>
 
@@ -546,47 +515,10 @@
                     <% } %>
                     <td class="text-right"><%= invoiceTax.taxType.name %></td>
                     <td class="text-right">
-                      <%= invoiceTax.amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
+                    <%= invoiceTax.amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
                     </td>
                   </tr>
                 <% } %>
-
-                <!-- <% if(isSameState) { %>
-                  <tr>
-                    <td class="text-right"></td>
-                    <% if(invoice.includeQuantity) { %>
-                      <td class="text-right"></td>
-                      <td class="text-right"></td>
-                    <% } %>
-                    <td class="text-right">CGST @<%= invoice.cgstRate %>%</td>
-                    <td class="text-right">
-                      <%= invoice.cgstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="text-right"></td>
-                    <% if(invoice.includeQuantity) { %>
-                      <td class="text-right"></td>
-                      <td class="text-right"></td>
-                    <% } %>
-                    <td class="text-right">SGST @<%= invoice.sgstRate %>%</td>
-                    <td class="text-right">
-                      <%= invoice.sgstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
-                    </td>
-                  </tr>
-                <% } else { %>
-                  <tr>
-                    <td class="text-right"></td>
-                    <% if(invoice.includeQuantity) { %>
-                      <td class="text-right"></td>
-                      <td class="text-right"></td>
-                    <% } %>
-                    <td class="text-right">IGST @<%= invoice.igstRate %>%</td>
-                    <td class="text-right">
-                      <%= invoice.igstAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
-                    </td>
-                  </tr>
-                <% } %> -->
 
               <% } %>
               <tr>
@@ -599,7 +531,6 @@
                 <td class="text-right"><b>
                   <%= invoice.total.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %>
                 </b></td>
-                <!-- <td class="text-right"><b><%= invoice.grandTotal.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></b></td> -->
               </tr>
             <% } %>
             
@@ -618,32 +549,6 @@
               <p class="bold mb-8">Terms and Conditions</p>
               <pre class="mb-32"><%- organization.invoicePreferences.defaultTerms %></pre>
             <% } %>
-
-            <!-- <% if(
-              organization.bankBeneficiaryName
-              || organization.bankName
-              || organization.bankAccountNumber
-              || organization.bankIFSC
-              || organization.bankAccountType
-            ) { %>
-            <p class="bold">Bank Details</p>
-            <% } %>
-            <% if(organization.bankBeneficiaryName) { %>
-              <p class="m-0"><span class="bold">Beneficiary Name: </span><%= organization.bankBeneficiaryName %></p>
-            <% } %>
-            <% if(organization.bankName) { %>
-              <p class="m-0"><span class="bold">Bank Name: </span><%= organization.bankName %></p>
-            <% } %>
-            <% if(organization.bankAccountNumber) { %>
-            <p class="m-0"><span class="bold">A/C Number: </span><%= organization.bankAccountNumber %></p>
-            <% } %>
-            <% if(organization.bankIFSC) { %>
-              <p class="m-0"><span class="bold">IFSC: </span><%= organization.bankIFSC %></p>
-            <% } %>
-            <% if(organization.bankAccountType) { %>
-              <p class="m-0"><span class="bold">A/C Type: </span><%= organization.bankAccountType %></p>
-            <% } %> -->
-
           </div>
           <div class="col-25 float-right">
             <div class="signature-container">
