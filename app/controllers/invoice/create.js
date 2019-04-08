@@ -146,8 +146,6 @@ async function controller(req, res) {
     roundedAmountReceivable: invoiceInstance.getRoundedAmountReceivable(),
   });
 
-  console.log('invoice', await Invoice.generatePdf(invoice.id));
-
   return res.status(201).json(invoice);
 }
 

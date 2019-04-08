@@ -138,7 +138,7 @@ InvoiceSchema.statics.generatePdf = async function (id) {
         { path: 'city' },
       ],
     });
-  console.log('invoice', invoice);
+  return invoice;
 };
 
 InvoiceSchema.plugin(mongoosePaginate);
