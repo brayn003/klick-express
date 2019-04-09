@@ -30,7 +30,7 @@ const ExpenseSchema = new mongoose.Schema({
   userAudits: true,
 });
 
-ExpenseSchema.statics.createExpense = async function (params, createdBy) {
+ExpenseSchema.statics.createOne = async function (params, createdBy) {
   const expense = await this.create({ ...params, createdBy });
   return expense;
 };
