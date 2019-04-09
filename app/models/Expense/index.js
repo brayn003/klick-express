@@ -41,9 +41,9 @@ ExpenseSchema.statics.updateExpense = async function (id, body) {
 };
 
 ExpenseSchema.statics.getAll = async function (params) {
-  const { name, user } = params;
+  const { title, user } = params;
   const criteria = {};
-  if (name) criteria.name = { $regex: new RegExp(name, 'i') };
+  if (title) criteria.title = { $regex: new RegExp(title, 'i') };
   if (user) {
     const roles = await this.model('OrganizationUser').find({ user });
     const expenseIds = roles.map(c => mongoose.Types.ObjectId(c.expense));
