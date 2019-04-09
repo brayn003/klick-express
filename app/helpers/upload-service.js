@@ -13,14 +13,7 @@ const s3 = new AWS.S3({
   region,
 });
 
-const getReadUrl = (params) => {
-  const {
-    region: awsRegion,
-    bucket: awsBucket,
-    key,
-  } = params;
-  return `https://s3.${awsRegion}.amazonaws.com/${awsBucket}/${key}`;
-};
+const getReadUrl = key => `https://s3.${region}.amazonaws.com/${bucket}/${key}`;
 
 const getSignedUrl = (fileName) => {
   let key = fileName;
@@ -35,11 +28,33 @@ const getSignedUrl = (fileName) => {
   };
   const urls = {
     writeUrl: s3.getSignedUrl('putObject', params),
-    readUrl: getReadUrl({ bucket, region, key }),
+    readUrl: getReadUrl(key),
   };
   return urls;
 };
 
+const uploadBuffer = async (buffer, options) => {
+  const {
+    name = `api-uploads/${uuidv4()}`,
+    type,
+  } = options;
+  const params = {
+    ACL: 'public-read',
+    Bucket: bucket,
+    Key: name,
+    ContentType: type,
+    Body: buffer,
+  };
+  return new Promise((resolve, reject) => {
+    s3.putObject(params, (err) => {
+      if (err) reject(err);
+      else resolve(getReadUrl(name));
+    });
+  });
+};
+
 module.exports = {
+  getReadUrl,
   getSignedUrl,
+  uploadBuffer,
 };

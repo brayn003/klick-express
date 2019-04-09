@@ -16,6 +16,7 @@ router.post('/organization', require('~controllers/organization/create'));
 router.get('/invoices', require('~controllers/invoice/find'));
 router.post('/invoice', require('~controllers/invoice/create'));
 router.get('/invoice/:id/view', require('~controllers/invoice/view'));
+router.get('/invoice/:id/sync', require('~controllers/invoice/sync'));
 
 router.get('/expenses', require('~controllers/expense/find'));
 router.post('/expense', require('~controllers/expense/create'));

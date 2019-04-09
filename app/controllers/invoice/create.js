@@ -112,9 +112,7 @@ async function controller(req, res) {
       tdsAmount,
     });
 
-    console.log(invoiceInstance.getOverallTaxes());
-
-    const invoice = await Invoice.create({
+    const invoice = await Invoice.createOne({
       organization: organization.id,
       organizationBranch: orgBranchId,
       client: client.id,

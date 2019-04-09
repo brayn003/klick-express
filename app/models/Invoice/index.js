@@ -3,6 +3,8 @@ const mongoosePaginate = require('mongoose-paginate');
 const padStart = require('lodash/padStart');
 
 const { renderHTML } = require('~helpers/template-service');
+const { renderPDF } = require('~helpers/pdf-service');
+const { uploadBuffer } = require('~helpers/upload-service');
 // const Particular = require('~models/Particular');
 // const InvoiceService = require('~helpers/invoice-service');
 // const { validateParticulars } = require('~helpers/tax-service');
@@ -59,7 +61,7 @@ const InvoiceSchema = new mongoose.Schema({
   status: { type: String, enum: ['open', 'closed', 'cancelled'], default: 'open' },
   inlineComment: { type: String },
   attachments: [{ type: String }],
-
+  fileUrl: { type: String },
   particulars: [InvoiceParticularSchema],
 
   discountRate: { type: Number, required: true },
@@ -92,9 +94,11 @@ const InvoiceSchema = new mongoose.Schema({
   userAudits: true,
 });
 
-InvoiceSchema.statics.add = async function (invoiceBody) {
-  const invoice = this.create(invoiceBody);
-  return invoice;
+InvoiceSchema.statics.createOne = async function (invoiceBody) {
+  const invoice = await this.create(invoiceBody);
+  const fileUrl = await this.generatePDF(invoice.id);
+  const updatedInvoice = await this.patchOne(invoice.id, { $set: { fileUrl } });
+  return updatedInvoice;
 };
 
 InvoiceSchema.statics.getAll = async function (params) {
@@ -138,9 +142,27 @@ InvoiceSchema.statics.generateHTML = async function (id) {
     .populate('particulars.taxes.taxType')
     .populate('taxes.taxType');
 
+  if (!invoice) {
+    throw new Error('Invoice doesn\'t exist');
+  }
+
   const template = invoice.organization.invoicePreferences.defaultTemplate;
   return renderHTML(`templates/invoice/${template}`, { invoice });
 };
+
+InvoiceSchema.statics.generatePDF = async function (id) {
+  const html = await this.generateHTML(id);
+  const pdfBuffer = await renderPDF(html, { width: 1190, height: 1684 });
+  const url = await uploadBuffer(pdfBuffer, { name: `invoices/${id}`, type: 'application/pdf' });
+  return url;
+};
+
+InvoiceSchema.statics.patchOne = async function (id, params) {
+  await this.updateOne({ _id: id }, params);
+  const invoice = await this.findById(id);
+  return invoice;
+};
+
 
 InvoiceSchema.plugin(mongoosePaginate);
 
