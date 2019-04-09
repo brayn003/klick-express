@@ -112,7 +112,7 @@ InvoiceSchema.statics.getAll = async function (params) {
   if (serial) criteria.serial = { $regex: new RegExp(serial, 'i') };
   if (status) criteria.status = status;
   if (organization) criteria.organization = organization;
-  const invoices = await this.paginate(criteria, { lean: true, sort: { raisedDate: 'desc' } });
+  const invoices = await this.paginate(criteria, { lean: true, sort: { _id: -1 } });
   return invoices;
 };
 
