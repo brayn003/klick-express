@@ -1,4 +1,4 @@
-const ExpenseCategory = require('~models/ExpenseCategory');
+const ExpenseCategory = require('~models/Expense/Category');
 
 const controller = async (req, res) => {
   const { body, user } = req;

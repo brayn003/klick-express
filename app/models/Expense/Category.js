@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate');
 
 const ExpenseCategorySchema = new mongoose.Schema({
   organization: { type: 'ObjectId', ref: 'Organization', required: true },
@@ -24,6 +25,6 @@ ExpenseCategorySchema.statics.createOne = async function (params) {
   return category;
 };
 
-
+ExpenseCategorySchema.plugin(mongoosePaginate);
 const ExpenseCategory = mongoose.model('ExpenseCategory', ExpenseCategorySchema);
 module.exports = ExpenseCategory;
