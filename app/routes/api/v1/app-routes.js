@@ -18,6 +18,9 @@ router.post('/invoice', require('~controllers/invoice/create'));
 router.get('/invoice/:id/view', require('~controllers/invoice/view'));
 router.get('/invoice/:id/sync', require('~controllers/invoice/sync'));
 
+router.get('/expense/categories', require('~controllers/expense/find'));
+router.post('/expense/category', require('~controllers/expense/create'));
+
 router.get('/expenses', require('~controllers/expense/find'));
 router.post('/expense', require('~controllers/expense/create'));
 router.patch('/expense', require('~controllers/expense/update'));
