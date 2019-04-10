@@ -5,33 +5,50 @@ const ExpenseSchema = new mongoose.Schema({
   // refs
   organization: { type: 'ObjectId', ref: 'Organization', required: true },
   category: { type: 'ObjectId', ref: 'ExpenseCategory', required: true },
-  payments: [{ type: 'ObjectId', ref: 'Payment' }],
+  // payments: [{ type: 'ObjectId', ref: 'Payment' }],
 
+  expenseDate: { type: Date, required: true },
   title: { type: String, required: true },
   serial: { type: String, default: null },
-  expenseDate: { type: Date, required: true },
-  taxInclusion: { type: String, enum: ['inclusive', 'exclusive'], required: true },
-  taxableAmount: { type: Number, required: true },
-  total: { type: Number, required: true },
-  taxAmount: { type: Number, required: true },
-  tdsAmount: { type: Number, required: true },
-  tdsRate: { type: Number, required: true },
-  amountPayable: { type: Number, required: true },
-  accountType: { type: String, enum: ['business', 'personal'], default: 'business' },
-  inlineComment: { type: String, required: true },
   attachments: [{ type: String }],
+  inlineComment: { type: String, required: true },
+
+  accountType: { type: String, enum: ['business', 'personal'], default: 'business' },
+  taxInclusion: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+
+  taxableAmount: { type: Number, required: true },
+  taxAmount: { type: Number, required: true },
+  total: { type: Number, required: true },
+  roundedTotal: { type: Number, required: true },
   taxes: [{
     taxType: { type: 'ObjectId', ref: 'TaxType' },
     amount: { type: Number, required: true },
   }],
+
+  tdsRate: { type: Number, required: true },
+  tdsAmount: { type: Number, required: true },
+  amountPayable: { type: Number, required: true },
+  roundedAmountPayable: { type: Number, required: true },
 }, {
   collection: 'expense',
   timestamps: true,
   userAudits: true,
 });
 
-ExpenseSchema.statics.createOne = async function (params, createdBy) {
-  const expense = await this.create({ ...params, createdBy });
+ExpenseSchema.statics.createOne = async function (params) {
+  const { amount, tdsAmount, ...rest } = params;
+  const expense = await this.create({
+    ...rest,
+    taxableAmount: amount,
+    taxAmount: 0,
+    total: amount,
+    roundedTotal: Math.round(amount),
+    taxes: [],
+    tdsRate: ((tdsAmount / amount) * 100),
+    tdsAmount,
+    amountPayable: amount - tdsAmount,
+    roundedAmountPayable: Math.round(amount - tdsAmount),
+  });
   return expense;
 };
 
