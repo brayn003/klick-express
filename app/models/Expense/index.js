@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
 
+const { ValidationError } = require('~helpers/extended-errors');
+
 const ExpenseSchema = new mongoose.Schema({
   // refs
   organization: { type: 'ObjectId', ref: 'Organization', required: true },
@@ -11,10 +13,10 @@ const ExpenseSchema = new mongoose.Schema({
   title: { type: String, required: true },
   serial: { type: String, default: null },
   attachments: [{ type: String }],
-  inlineComment: { type: String, required: true },
+  inlineComment: { type: String, default: '' },
 
   accountType: { type: String, enum: ['business', 'personal'], default: 'business' },
-  taxInclusion: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+  taxInclusion: { type: String, enum: ['inclusive', 'exclusive'], default: 'exclusive' },
 
   taxableAmount: { type: Number, required: true },
   taxAmount: { type: Number, required: true },
@@ -37,6 +39,10 @@ const ExpenseSchema = new mongoose.Schema({
 
 ExpenseSchema.statics.createOne = async function (params) {
   const { amount, tdsAmount, ...rest } = params;
+  if (amount <= 0) {
+    throw new ValidationError('Amount should be more than 0');
+  }
+
   const expense = await this.create({
     ...rest,
     taxableAmount: amount,
@@ -66,7 +72,11 @@ ExpenseSchema.statics.getAll = async function (params) {
     const expenseIds = roles.map(c => mongoose.Types.ObjectId(c.expense));
     criteria._id = { $in: expenseIds };
   }
-  const expenses = await this.paginate(criteria, { lean: true });
+  const expenses = await this.paginate(criteria, {
+    lean: true,
+    sort: { _id: -1 },
+    populate: ['category', { path: 'createdBy', model: 'User' }],
+  });
   return expenses;
 };
 ExpenseSchema.plugin(mongoosePaginate);
