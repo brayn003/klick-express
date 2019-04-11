@@ -1,12 +1,10 @@
 const Invoice = require('~models/Invoice');
-const { transformError } = require('~helpers/error-handlers');
+const { ForbiddenError } = require('~helpers/extended-errors');
 
 const controller = async (req, res) => {
   const { user, query } = req;
   if (!user.admin && !query.organization) {
-    return res
-      .status(403)
-      .json(transformError('You don\'t have permission to view all invoices', 'E_FORBIDDEN'));
+    throw new ForbiddenError('You don\'t have access to access all invoices');
   }
   const invoices = await Invoice.getAll(query);
   return res.json(invoices);

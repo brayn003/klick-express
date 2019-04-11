@@ -1,29 +1,16 @@
-const { check } = require('express-validator/check');
-
 const User = require('~models/User');
 const Invite = require('~models/Invite');
-const { validateParams } = require('~helpers/validation-service');
-const { transformError } = require('~helpers/error-handlers');
 
-const checks = [
-  check('email').isEmail().withMessage('not a valid email'),
-  check('password').isLength({ min: 5 }).withMessage('should be more than 5 chars'),
-  check('code').exists(),
-  check('name').exists(),
-];
+const { ValidationError } = require('~models/extended-errors');
 
 const controller = async (req, res) => {
   const { email, code, ...rest } = req.body;
-  try {
-    const inviteStatus = await Invite.useInvite(email, code);
-    if (inviteStatus) {
-      const user = await User.createUser({ email, ...rest });
-      return res.status(201).json(user);
-    }
-    return res.status(400).json(transformError('Invalid invite code'));
-  } catch (err) {
-    return res.status(400).json(transformError(err));
+  const inviteStatus = await Invite.useInvite(email, code);
+  if (!inviteStatus) {
+    throw new ValidationError('Invalid invite code');
   }
+  const user = await User.createUser({ email, ...rest });
+  return res.status(201).json(user);
 };
 
-module.exports = [validateParams(checks), controller];
+module.exports = controller;
