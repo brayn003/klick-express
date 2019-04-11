@@ -1,7 +1,7 @@
 const User = require('~models/User');
 const Invite = require('~models/Invite');
 
-const { ValidationError } = require('~models/extended-errors');
+const { ValidationError } = require('~helpers/extended-errors');
 
 const controller = async (req, res) => {
   const { email, code, ...rest } = req.body;
