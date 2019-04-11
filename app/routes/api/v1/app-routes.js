@@ -1,32 +1,40 @@
-const { Router } = require('express');
+const { declareApiRoutes } = require('~helpers/route-service');
 
-const router = Router();
+const routes = [
+  // users
+  'get    /users                    user/find',
+  'get    /user/me                  user/me',
 
-router.get('/users', require('~controllers/user/find'));
-router.get('/user/me', require('~controllers/user/me'));
+  // organization branches
+  'get    /organization/branches    organization-branch/find',
+  'post   /organization/branch      organization-branch/create',
+  'patch  /organization/branch/:id  organization-branch/update',
 
-router.get('/organization/branches', require('~controllers/organization-branch/find'));
-router.post('/organization/branch', require('~controllers/organization-branch/create'));
-router.patch('/organization/branch/:id', require('~controllers/organization-branch/update'));
+  // organizations
+  'get    /organizations            organization/find',
+  'get    /organization/:id         organization/findOne',
+  'post   /organization             organization/create',
 
-router.get('/organizations', require('~controllers/organization/find'));
-router.get('/organization/:id', require('~controllers/organization/findOne'));
-router.post('/organization', require('~controllers/organization/create'));
+  // invoices
+  'get    /invoices                 invoice/find',
+  'post   /invoice                  invoice/create',
+  'get    /invoice/:id/view         invoice/view',
+  'get    /invoice/:id/sync         invoice/sync',
 
-router.get('/invoices', require('~controllers/invoice/find'));
-router.post('/invoice', require('~controllers/invoice/create'));
-router.get('/invoice/:id/view', require('~controllers/invoice/view'));
-router.get('/invoice/:id/sync', require('~controllers/invoice/sync'));
+  // expense categories
+  'get    /expense/categories       expense-category/find',
+  'post   /expense/category         expense-category/create',
 
-router.get('/expense/categories', require('~controllers/expense-category/find'));
-router.post('/expense/category', require('~controllers/expense-category/create'));
+  // expense
+  'get    /expenses                 expense/find',
+  'post   /expense                  expense/create',
+  'patch  /expense                  expense/update',
 
-router.get('/expenses', require('~controllers/expense/find'));
-router.post('/expense', require('~controllers/expense/create'));
-router.patch('/expense', require('~controllers/expense/update'));
+  // upload
+  'get    /upload/signed-url        upload/getSignedUrl',
 
-router.get('/upload/signed-url', require('~/controllers/upload/getSignedUrl'));
+  // taxtypes
+  'get    /tax-types                tax-type/find',
+];
 
-router.get('/tax-types', require('~/controllers/tax-type/find'));
-
-module.exports = router;
+module.exports = declareApiRoutes(routes);

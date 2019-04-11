@@ -5,4 +5,11 @@ function transformError(e, code) {
   return err;
 }
 
-module.exports = { transformError };
+class ValidationError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+module.exports = { transformError, ValidationError };

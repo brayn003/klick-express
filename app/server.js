@@ -51,6 +51,7 @@ async function main() {
 
   // routes
   app.use('/', require('./routes'));
+  app.use(require('~middlewares/catch-error'));
 
   // app launch
   if (argv.repl) {
