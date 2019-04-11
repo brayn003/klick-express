@@ -10,11 +10,7 @@ const checks = [
 
 async function controller(req, res) {
   const { email, password } = req.body;
-  try {
-    const token = await Admin.authenticate(email, password);
-    return res.json({ token });
-  } catch (e) {
-    return res.status(401).json({ messages: [e instanceof Error ? e.toString() : e] });
-  }
+  const token = await Admin.authenticate(email, password);
+  return res.json({ token });
 }
 module.exports = [validateParams(checks), controller];
