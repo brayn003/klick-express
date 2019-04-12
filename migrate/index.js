@@ -10,6 +10,8 @@ function migName(file) {
   return path.basename(file, '.js');
 }
 
+const defaultGroupName = 'migrations';
+
 async function initUmzug() {
   const con = await mongodb.connect(process.env.MONGODB_URL, { useNewUrlParser: true });
   const connection = con.db(process.env.MONGODB_DB);
@@ -17,13 +19,13 @@ async function initUmzug() {
     storage: 'mongodb',
     storageOptions: {
       connection,
-      collectionName: '_migrations',
+      collectionName: argv.group ? `__${argv.group}` : `__${defaultGroupName}`,
     },
     migrations: {
       params: [
         connection,
       ],
-      path: `migrate/${argv.dir ? argv.dir : 'migrations'}`,
+      path: `migrate/${argv.group ? argv.group : defaultGroupName}`,
       pattern: /\.js$/,
     },
   });
