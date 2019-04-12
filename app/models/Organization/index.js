@@ -5,11 +5,11 @@ const Branch = require('~models/Organization/Branch');
 
 const OrganizationSchema = new mongoose.Schema({
   name: { type: String, required: true, minlength: 5 },
-  pan: { type: String, default: '' },
-  phone: { type: String, default: '' },
-  email: { type: String, default: '' },
-  logo: { type: String, default: '' },
-  signature: { type: String, default: '' },
+  pan: { type: String, default: null },
+  phone: { type: String, default: null },
+  email: { type: String, default: null },
+  logo: { type: String, default: null },
+  signature: { type: String, default: null },
   verified: { type: Boolean, default: false },
   defaultBranch: { type: 'ObjectId', ref: 'OrganizationBranch' },
   code: { type: String, minlength: 2, maxlength: 4 },
@@ -22,7 +22,7 @@ const OrganizationSchema = new mongoose.Schema({
     taxPerItem: { type: Boolean, default: false },
     includeQuantity: { type: Boolean, default: false },
 
-    defaultTerms: { type: String, default: '' },
+    defaultTerms: { type: String, default: null },
 
     defaultEmailFrom: { type: String, default: process.env.EMAIL_NOREPLY },
     defaultEmailSubject: { type: String, default: 'New Invoice Raised' },

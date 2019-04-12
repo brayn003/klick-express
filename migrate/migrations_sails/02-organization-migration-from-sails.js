@@ -23,6 +23,7 @@ async function up(con) {
     newOrg.phone = oldOrg.phone;
     newOrg.email = oldOrg.email;
     newOrg.logo = oldOrg.logo;
+    newOrg.verified = true;
     newOrg.signature = oldOrg.signature;
     newOrg.code = oldOrg.invoiceSerialPrefix;
     newOrg.industryType = oldOrg.type;
@@ -32,15 +33,17 @@ async function up(con) {
     newOrg.invoicePreferences.taxPerItem = oldOrg.invoiceTaxPerItem;
     newOrg.invoicePreferences.includeQuantity = oldOrg.type === 'product-based';
     newOrg.invoicePreferences.defaultTerms = oldOrg.invoiceTerms;
+    newOrg.invoicePreferences.defaultEmailFrom = 'no-reply@klickconsulting.in';
     newOrg.invoicePreferences.defaultEmailSubject = oldOrg.invoiceEmailSubject;
     newOrg.invoicePreferences.defaultEmailBody = oldOrg.invoiceEmailBody;
     newOrg.expensePreferences = {};
     newOrg.expensePreferences.showAccountType = false;
+    newOrg.referrer = null;
 
     const newBranch = { ...convertMeta(oldOrg) };
     newBranch.updatedAt = null;
     newBranch.organization = oldOrg._id;
-    newBranch.name = 'Branch 1';
+    newBranch.name = 'DEFAULT BRANCH';
     newBranch.code = 'B1';
     newBranch.addressLineOne = oldOrg.address;
     newBranch.addressLineTwo = '';

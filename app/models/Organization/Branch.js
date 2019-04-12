@@ -13,9 +13,9 @@ const BranchSchema = new mongoose.Schema({
   addressLineTwo: { type: String },
   state: { type: 'ObjectId', ref: 'Location' },
   city: { type: 'ObjectId', ref: 'Location' },
-  pincode: { type: String },
+  pincode: { type: String, default: null },
 
-  gstNumber: { type: String },
+  gstNumber: { type: String, default: null },
 }, {
   collection: 'organization_branch',
   timestamps: true,
