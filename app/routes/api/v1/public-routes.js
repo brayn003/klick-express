@@ -1,13 +1,15 @@
-const { Router } = require('express');
+const { declareApiRoutes } = require('~helpers/route-service');
 
-const router = Router();
+const routes = [
+  // public auth
+  'post   /auth/register        auth/register',
+  'post   /auth/login           auth/login',
+  'post   /auth/verify-token    auth/verifyToken',
 
-router.post('/auth/register', require('~controllers/auth/register'));
-router.post('/auth/login', require('~controllers/auth/login'));
-router.post('/auth/verify-token', require('~controllers/auth/verifyToken'));
+  // admin auth
+  'post   /admin/login          admin/login',
+  'post   /admin/verify-token   admin/verifyToken',
+  'post   /admin/add-admin      admin/add',
+];
 
-router.post('/admin/login', require('~controllers/admin/login'));
-router.post('/admin/verify-token', require('~controllers/admin/verify-token'));
-router.post('/admin/add-admin', require('~controllers/admin/add'));
-
-module.exports = router;
+module.exports = declareApiRoutes(routes);

@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
+const { AuthenticationError } = require('~helpers/extended-errors');
 
 function verifyJWT(token, secret) {
   return new Promise((resolve, reject) => {
     jwt.verify(token, secret, (err, decodedData) => {
       if (err || !decodedData) {
-        reject(err);
+        reject(new AuthenticationError(err.message || 'Not authenticated'));
       } else {
         resolve(decodedData);
       }

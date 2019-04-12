@@ -1,17 +1,22 @@
-const { Router } = require('express');
+const { declareApiRoutes } = require('~helpers/route-service');
 
-const router = Router();
+const routes = [
+  // admins
+  'get    /get-admins       admin/find',
 
-router.get('/get-admins', require('~controllers/admin/find'));
+  // invites
+  'post   /invite-user      invite/create',
 
-router.post('/invite-user', require('~controllers/invite/create'));
+  // users
+  'get    /users            user/find',
 
-router.get('/users', require('~controllers/user/find'));
+  // organizations
+  'get    /organizations    organization/find',
 
-router.get('/organizations', require('~controllers/organization/find'));
+  // expenses
+  'get    /expenses         expense/find',
+  'post   /expense          expense/create',
+  'patch  /expense          expense/update',
+];
 
-router.get('/expenses', require('~controllers/expense/find'));
-router.post('/expense', require('~controllers/expense/create'));
-router.patch('/expense', require('~controllers/expense/update'));
-
-module.exports = router;
+module.exports = declareApiRoutes(routes);
