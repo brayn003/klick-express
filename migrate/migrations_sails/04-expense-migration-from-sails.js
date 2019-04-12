@@ -35,10 +35,10 @@ async function up(con) {
 
     if (oldEx.paymentDate) {
       const exp = { ...convertMeta(oldEx) };
-      exp.expenseId = oldEx._id;
+      exp.expense = oldEx._id;
       exp.amount = oldEx.amountAfterTax;
       exp.paymentDate = new Date(oldEx.paymentDate);
-      exp.paymentMode = oldEx.paymentMode;
+      exp.mode = oldEx.paymentMode;
       exp.inlineComment = '';
       exp.type = 'debit';
 

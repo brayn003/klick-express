@@ -16,7 +16,7 @@ const ExpenseSchema = new mongoose.Schema({
   serial: { type: String, default: null },
   attachments: [{ type: String }],
   inlineComment: { type: String, default: '' },
-  status: { type: String, enum: ['open', 'closed'] },
+  status: { type: String, enum: ['open', 'closed', 'cancelled'], default: 'open' },
 
   accountType: { type: String, enum: ['business', 'personal'], default: 'business' },
   taxInclusion: { type: String, enum: ['inclusive', 'exclusive'], default: 'exclusive' },
