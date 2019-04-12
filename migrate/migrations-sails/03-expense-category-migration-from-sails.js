@@ -10,6 +10,7 @@ async function up(con) {
 
   oldCats.forEach((oldCat) => {
     const cat = { ...convertMeta(oldCat) };
+    cat._id = oldCat._id;
     cat.name = oldCat.name;
     cat.organization = oldCat.organization;
     cat.description = '';

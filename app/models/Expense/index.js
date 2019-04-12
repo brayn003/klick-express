@@ -7,13 +7,16 @@ const ExpenseSchema = new mongoose.Schema({
   // refs
   organization: { type: 'ObjectId', ref: 'Organization', required: true },
   category: { type: 'ObjectId', ref: 'ExpenseCategory', required: true },
-  // payments: [{ type: 'ObjectId', ref: 'Payment' }],
+  payments: [{ type: 'ObjectId', ref: 'Payment' }],
 
   expenseDate: { type: Date, required: true },
+  dueDate: { type: 'ObjectId', default: null },
+
   title: { type: String, required: true },
   serial: { type: String, default: null },
   attachments: [{ type: String }],
   inlineComment: { type: String, default: '' },
+  status: { type: String, enum: ['open', 'closed'] },
 
   accountType: { type: String, enum: ['business', 'personal'], default: 'business' },
   taxInclusion: { type: String, enum: ['inclusive', 'exclusive'], default: 'exclusive' },

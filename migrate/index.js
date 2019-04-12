@@ -109,7 +109,7 @@ async function executeCmd(umzug) {
     console.log(chalk.bold`-- Done --`);
   } catch (err) {
     console.log(chalk.red`-- Error --`);
-    console.error(chalk.red(err));
+    console.error(chalk.red(err.stack));
   }
 }
 
