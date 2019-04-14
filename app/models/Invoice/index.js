@@ -59,7 +59,7 @@ const InvoiceSchema = new mongoose.Schema({
   taxInclusion: { type: String, enum: ['inclusive', 'exclusive'], default: 'exclusive' },
   serial: { type: String, default: null },
   status: { type: String, enum: ['open', 'closed', 'cancelled'], default: 'open' },
-  inlineComment: { type: String },
+  inlineComment: { type: String, default: null },
   attachments: [{ type: String }],
   fileUrl: { type: String },
   particulars: [InvoiceParticularSchema],

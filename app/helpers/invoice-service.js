@@ -26,7 +26,7 @@ class InvoiceService {
     this.getParticularDiscountAmount = this.getParticularDiscountAmount.bind(this);
     this.getParticularAmount = this.getParticularAmount.bind(this);
     this.getParticularTaxableAmount = this.getParticularTaxableAmount.bind(this);
-    this.getParticularTaxes = this.getParticularTaxes.bind(this);
+    this._getParticularTaxes = this._getParticularTaxes.bind(this);
     this.getParticularTaxAmount = this.getParticularTaxAmount.bind(this);
     this.getParticularTotal = this.getParticularTotal.bind(this);
   }
@@ -99,7 +99,7 @@ class InvoiceService {
     return this.getParticularTaxableAmount(particular) + this.getParticularTaxAmount(particular);
   }
 
-  getParticularTaxes(particular) {
+  _getParticularTaxes(particular) {
     const taxableAmount = this.getParticularTaxableAmount(particular);
     return (particular.taxes || [])
       .map(({ taxType }) => ({
@@ -107,9 +107,17 @@ class InvoiceService {
       }));
   }
 
+  getParticularTaxes(particular) {
+    const particularTaxes = this._getParticularTaxes(particular);
+    return particularTaxes.map(tax => ({
+      ...tax,
+      taxType: tax.taxType._id,
+    }));
+  }
+
   getAggregatedParticularTaxes() {
     const taxesMap = this.particulars.reduce((agg, particular) => {
-      const particularTaxes = this.getParticularTaxes(particular);
+      const particularTaxes = this._getParticularTaxes(particular);
       return particularTaxes.reduce((agg2, particularTax) => {
         const agg3 = agg2;
         const key = `${particularTax.taxType.type}`;
@@ -128,6 +136,7 @@ class InvoiceService {
     const aggregatedParticularTaxes = this.getAggregatedParticularTaxes();
     return aggregatedParticularTaxes.map(tax => ({
       ...tax,
+      taxType: tax.taxType._id,
       amount: tax.amount - (this.getInvoiceDiscountAmount() * (tax.taxType.rate / 100)),
     }));
   }
