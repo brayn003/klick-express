@@ -67,7 +67,7 @@ ExpenseSchema.statics.updateExpense = async function (id, body) {
 };
 
 ExpenseSchema.statics.getAll = async function (params) {
-  const { title, user } = params;
+  const { title, user, organization } = params;
   const criteria = {};
   if (title) criteria.title = { $regex: new RegExp(title, 'i') };
   if (user) {
@@ -75,6 +75,7 @@ ExpenseSchema.statics.getAll = async function (params) {
     const expenseIds = roles.map(c => mongoose.Types.ObjectId(c.expense));
     criteria._id = { $in: expenseIds };
   }
+  if (organization) criteria.organization = organization;
   const expenses = await this.paginate(criteria, {
     lean: true,
     sort: { _id: -1 },
