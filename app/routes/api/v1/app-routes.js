@@ -25,10 +25,14 @@ const routes = [
   'get    /expense/categories       expense-category/find',
   'post   /expense/category         expense-category/create',
 
+  // payment expense
+  'post   /expense/payment          payment-expense/create',
+
   // expense
   'get    /expenses                 expense/find',
   'post   /expense                  expense/create',
   'patch  /expense                  expense/update',
+
 
   // upload
   'get    /upload/signed-url        upload/getSignedUrl',
