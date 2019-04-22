@@ -67,7 +67,9 @@ ExpenseSchema.statics.updateExpense = async function (id, body) {
 };
 
 ExpenseSchema.statics.getAll = async function (params) {
-  const { title, user, organization } = params;
+  const {
+    title, user, organization, page,
+  } = params;
   const criteria = {};
   if (title) criteria.title = { $regex: new RegExp(title, 'i') };
   if (user) {
@@ -80,6 +82,7 @@ ExpenseSchema.statics.getAll = async function (params) {
     lean: true,
     sort: { _id: -1 },
     populate: ['category', { path: 'createdBy', model: 'User' }],
+    page: parseInt(page, 10),
   });
   return expenses;
 };
