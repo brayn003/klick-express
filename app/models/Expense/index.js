@@ -68,7 +68,7 @@ ExpenseSchema.statics.updateExpense = async function (id, body) {
 
 ExpenseSchema.statics.getAll = async function (params) {
   const {
-    title, user, organization, page,
+    title, user, organization, page = 1,
   } = params;
   const criteria = {};
   if (title) criteria.title = { $regex: new RegExp(title, 'i') };

@@ -103,7 +103,7 @@ InvoiceSchema.statics.createOne = async function (invoiceBody) {
 
 InvoiceSchema.statics.getAll = async function (params) {
   const {
-    from, to, serial, status, organization,
+    from, to, serial, status, organization, page = 1,
   } = params;
   const criteria = {};
   if (from || to) criteria.raisedDate = {};
@@ -112,7 +112,11 @@ InvoiceSchema.statics.getAll = async function (params) {
   if (serial) criteria.serial = { $regex: new RegExp(serial, 'i') };
   if (status) criteria.status = status;
   if (organization) criteria.organization = organization;
-  const invoices = await this.paginate(criteria, { lean: true, sort: { _id: -1 } });
+  const invoices = await this.paginate(criteria, {
+    lean: true,
+    sort: { _id: -1 },
+    page: parseInt(page, 10),
+  });
   return invoices;
 };
 
