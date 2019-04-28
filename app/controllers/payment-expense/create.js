@@ -7,7 +7,7 @@ const controller = async (req, res) => {
     throw new ValidationError('Amount cannot be less than 0');
   }
   const paymentExpense = await PaymentExpense.createOne({
-    body,
+    ...body,
     createdBy: user.id,
   });
   return res.status(201).json(paymentExpense);
