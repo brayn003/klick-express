@@ -22,8 +22,17 @@ class AuthenticationError extends Error {
   }
 }
 
+class MissingError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'MissingError';
+    this.code = 404;
+  }
+}
+
 module.exports = {
   ValidationError,
   ForbiddenError,
   AuthenticationError,
+  MissingError,
 };

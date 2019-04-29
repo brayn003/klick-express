@@ -56,7 +56,7 @@ async function up(con) {
     .toArray();
 
   payments.forEach((payment) => {
-    bulk2.find({ _id: payment.organization }).updateOne({ $set: { payments: [payment._id] } });
+    bulk2.find({ _id: payment.expense }).updateOne({ $set: { payments: [payment._id] } });
   });
   await bulk2.execute();
 }

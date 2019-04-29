@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
+const sumBy = require('lodash/sumBy');
 
-const { ValidationError } = require('~helpers/extended-errors');
+const { ValidationError, MissingError } = require('~helpers/extended-errors');
+const PaymentExpense = require('~models/Payment/Expense');
 
 const ExpenseSchema = new mongoose.Schema({
   // refs
@@ -10,7 +12,7 @@ const ExpenseSchema = new mongoose.Schema({
   payments: [{ type: 'ObjectId', ref: 'Payment' }],
 
   expenseDate: { type: Date, required: true },
-  dueDate: { type: 'ObjectId', default: null },
+  dueDate: { type: Date, default: null },
 
   title: { type: String, required: true },
   serial: { type: String, default: null },
@@ -40,29 +42,12 @@ const ExpenseSchema = new mongoose.Schema({
   userAudits: true,
 });
 
-ExpenseSchema.statics.createOne = async function (params) {
-  const { amount, tdsAmount, ...rest } = params;
-  if (amount <= 0) {
-    throw new ValidationError('Amount should be more than 0');
-  }
-
-  const expense = await this.create({
-    ...rest,
-    taxableAmount: amount,
-    taxAmount: 0,
-    total: amount,
-    roundedTotal: Math.round(amount),
-    taxes: [],
-    tdsRate: ((tdsAmount / amount) * 100),
-    tdsAmount,
-    amountPayable: amount - tdsAmount,
-    roundedAmountPayable: Math.round(amount - tdsAmount),
-  });
-  return expense;
-};
-
-ExpenseSchema.statics.updateExpense = async function (id, body) {
-  const expense = await this.findByAndUpdate({ id, body });
+ExpenseSchema.statics.getById = async function (id) {
+  const expense = await this.findById(id)
+    .populate('organization')
+    .populate('category')
+    .populate('payments')
+    .populate('taxes.taxType');
   return expense;
 };
 
@@ -86,6 +71,56 @@ ExpenseSchema.statics.getAll = async function (params) {
   });
   return expenses;
 };
+
+ExpenseSchema.statics.createOne = async function (params) {
+  const { amount, tdsAmount, ...rest } = params;
+  if (amount <= 0) {
+    throw new ValidationError('Amount should be more than 0');
+  }
+
+  const expense = await this.create({
+    ...rest,
+    taxableAmount: amount,
+    taxAmount: 0,
+    total: amount,
+    roundedTotal: Math.round(amount),
+    taxes: [],
+    tdsRate: ((tdsAmount / amount) * 100),
+    tdsAmount,
+    amountPayable: amount - tdsAmount,
+    roundedAmountPayable: Math.round(amount - tdsAmount),
+  });
+  return expense;
+};
+
+ExpenseSchema.statics.patchOne = async function (id, body) {
+  await this.updateOne({ _id: id }, { $set: body });
+  const expense = await this.getById(id);
+  return expense;
+};
+
+
+ExpenseSchema.statics.createPayment = async function (params) {
+  if (params.amount < 0) throw new ValidationError('Amount cannot be less than 0');
+  if (!params.expense) throw new ValidationError('Need to provide an expense id');
+  const oldExpense = await this.getById(params.expense);
+  if (!oldExpense) throw new MissingError('Expense does not exist');
+  const paymentAmountDone = sumBy(oldExpense.payments, 'amount');
+  const paymentRemaining = oldExpense.roundedAmountPayable - paymentAmountDone;
+  if (params.amount > paymentRemaining) throw new ValidationError('Cannot pay more than the remaining value');
+  const paymentExpense = await PaymentExpense.createOne(params);
+  const updateSet = {};
+  if (params.amount === paymentRemaining) updateSet.status = 'closed';
+  await this.updateOne({ _id: params.expense }, {
+    $push: { payments: paymentExpense.id },
+    $set: updateSet,
+  });
+  const expense = await this.getById(params.expense);
+  return expense;
+};
+
 ExpenseSchema.plugin(mongoosePaginate);
+
 const Expense = mongoose.model('Expense', ExpenseSchema);
+
 module.exports = Expense;

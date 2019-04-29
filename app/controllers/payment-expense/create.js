@@ -1,16 +1,12 @@
-const PaymentExpense = require('~models/Payment/Expense');
-const { ValidationError } = require('~helpers/extended-errors');
+const Expense = require('~models/Expense');
 
 const controller = async (req, res) => {
   const { body, user } = req;
-  if (body.amount < 0) {
-    throw new ValidationError('Amount cannot be less than 0');
-  }
-  const paymentExpense = await PaymentExpense.createOne({
+  const expense = await Expense.createPayment({
     ...body,
     createdBy: user.id,
   });
-  return res.status(201).json(paymentExpense);
+  return res.status(201).json(expense);
 };
 
 module.exports = controller;
