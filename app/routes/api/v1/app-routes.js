@@ -29,9 +29,10 @@ const routes = [
   'post   /expense/payment          payment-expense/create',
 
   // expense
+  'get    /expense/:id              expense/findOne',
   'get    /expenses                 expense/find',
   'post   /expense                  expense/create',
-  'patch  /expense                  expense/update',
+  'patch  /expense/:id              expense/update',
 
 
   // upload
