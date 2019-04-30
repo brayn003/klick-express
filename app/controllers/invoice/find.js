@@ -7,7 +7,7 @@ const controller = async (req, res) => {
     throw new ForbiddenError('You don\'t have access to access all invoices');
   }
   const invoices = await Invoice.getAll(query);
-  return res.json(invoices);
+  return res.status(200).json(invoices);
 };
 
 module.exports = controller;

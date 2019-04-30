@@ -15,9 +15,13 @@ const routes = [
   'get    /organization/:id         organization/findOne',
   'post   /organization             organization/create',
 
+  // payment invoice
+  'post   /invoice/payment          payment-invoice/create',
+
   // invoices
   'get    /invoices                 invoice/find',
   'post   /invoice                  invoice/create',
+  'get    /invoice/:id              invoice/findOne',
   'get    /invoice/:id/view         invoice/view',
   'get    /invoice/:id/sync         invoice/sync',
 

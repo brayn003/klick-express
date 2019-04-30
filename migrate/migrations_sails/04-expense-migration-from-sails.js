@@ -40,7 +40,7 @@ async function up(con) {
       exp.paymentDate = new Date(oldEx.paymentDate);
       exp.mode = oldEx.paymentMode;
       exp.inlineComment = '';
-      exp.type = 'debit';
+      exp.type = 'expense';
 
       bulkp.insert(exp);
     }

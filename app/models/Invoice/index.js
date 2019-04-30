@@ -1,10 +1,14 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
 const padStart = require('lodash/padStart');
+const sumBy = require('lodash/sumBy');
 
 const { renderHTML } = require('~helpers/template-service');
 const { renderPDF } = require('~helpers/pdf-service');
 const { uploadBuffer } = require('~helpers/upload-service');
+const { ValidationError, MissingError } = require('~helpers/extended-errors');
+const PaymentInvoice = require('~models/Payment/Invoice');
+require('~models/Payment');
 // const Particular = require('~models/Particular');
 // const InvoiceService = require('~helpers/invoice-service');
 // const { validateParticulars } = require('~helpers/tax-service');
@@ -101,6 +105,25 @@ InvoiceSchema.statics.createOne = async function (invoiceBody) {
   return updatedInvoice;
 };
 
+InvoiceSchema.statics.getById = async function (id) {
+  const invoice = await this.findById(id)
+    .populate('organization')
+    .populate('client')
+    .populate({
+      path: 'organizationBranch',
+      populate: ['state', 'city'],
+    })
+    .populate({
+      path: 'clientBranch',
+      populate: ['state', 'city'],
+    })
+    .populate('particulars.details')
+    .populate('particulars.taxes.taxType')
+    .populate('taxes.taxType')
+    .populate('payments');
+  return invoice;
+};
+
 InvoiceSchema.statics.getAll = async function (params) {
   const {
     from, to, serial, status, organization, page = 1,
@@ -115,9 +138,31 @@ InvoiceSchema.statics.getAll = async function (params) {
   const invoices = await this.paginate(criteria, {
     lean: true,
     sort: { _id: -1 },
+    populate: [
+      'payments',
+    ],
     page: parseInt(page, 10),
   });
   return invoices;
+};
+
+InvoiceSchema.statics.createPayment = async function (params) {
+  if (params.amount < 0) throw new ValidationError('Amount cannot be less than 0');
+  if (!params.invoice) throw new ValidationError('Need to provide an invoice id');
+  const oldInvoice = await this.getById(params.invoice);
+  if (!oldInvoice) throw new MissingError('Invoice does not exist');
+  const paymentAmountDone = Math.round(sumBy(oldInvoice.payments, 'amount'));
+  const paymentRemaining = oldInvoice.roundedAmountReceivable - paymentAmountDone;
+  if (params.amount > paymentRemaining) throw new ValidationError('Cannot pay more than the remaining value');
+  const paymentInvoice = await PaymentInvoice.createOne(params);
+  const updateSet = {};
+  if (params.amount === paymentRemaining) updateSet.status = 'closed';
+  await this.updateOne({ _id: params.invoice }, {
+    $push: { payments: paymentInvoice.id },
+    $set: updateSet,
+  });
+  const invoice = await this.getById(params.invoice);
+  return invoice;
 };
 
 InvoiceSchema.statics.getNewSerial = async function (params) {

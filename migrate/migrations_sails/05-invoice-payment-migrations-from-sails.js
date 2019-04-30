@@ -23,11 +23,20 @@ async function up(con) {
     if (!invoice) {
       console.log(`No invoice ${oldP.invoice} found for ${oldP._id}`);
     }
+
+    let deletedAt = (new Date()).valueOf();
+    if (invoice) {
+      if (invoice.deletedAt) {
+        // eslint-disable-next-line prefer-destructuring
+        deletedAt = invoice.deletedAt;
+      } else {
+        deletedAt = null;
+      }
+    }
     const p = {
       ...convertMeta({
         ...oldP,
-        deleted: invoice ? !!invoice.deletedAt : true,
-        deletedAt: invoice ? new Date(invoice.deletedAt) : new Date(),
+        deletedAt,
       }),
     };
     p._id = oldP._id;
@@ -36,7 +45,7 @@ async function up(con) {
     p.paymentDate = new Date(oldP.paymentDate);
     p.mode = oldP.paymentMode;
     p.inlineComment = '';
-    p.type = 'credit';
+    p.type = 'invoice';
 
     bulk.insert(p);
   });
