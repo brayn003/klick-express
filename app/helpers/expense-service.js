@@ -1,27 +1,35 @@
 const { ValidationError } = require('~helpers/extended-errors');
 
 class ExpenseService {
-  constructor(body) {
-    this.body = body;
+  constructor({ amount, tdsAmount, taxInclusion }) {
+    this.amount = amount;
+    this.tdsAmount = tdsAmount;
+    this.taxInclusion = taxInclusion;
 
-    if (this.body.amount <= 0) {
+    if (this.amount <= 0) {
       throw new ValidationError('Amount should be more than 0');
     }
+
+    this.getTdsAmount = this.getTdsAmount.bind(this);
+  }
+
+  getTdsAmount() {
+    return this.tdsAmount;
   }
 
   getModeledData() {
-    const { amount, tdsAmount, ...rest } = this.body;
+    const tdsAmount = this.getTdsAmount();
     return {
-      ...rest,
-      taxableAmount: amount,
+      taxInclusion: 'inclusive',
+      taxableAmount: this.amount,
       taxAmount: 0,
-      total: amount,
-      roundedTotal: Math.round(amount),
+      total: this.amount,
+      roundedTotal: Math.round(this.amount),
       taxes: [],
-      tdsRate: ((tdsAmount / amount) * 100),
+      tdsRate: ((tdsAmount / this.amount) * 100),
       tdsAmount,
-      amountPayable: amount - tdsAmount,
-      roundedAmountPayable: Math.round(amount - tdsAmount),
+      amountPayable: this.amount - tdsAmount,
+      roundedAmountPayable: Math.round(this.amount - tdsAmount),
     };
   }
 }

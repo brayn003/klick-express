@@ -84,16 +84,27 @@ ExpenseSchema.statics.createOne = async function (params) {
 };
 
 ExpenseSchema.statics.patchOne = async function (id, params) {
-  const expenseInstance = new ExpenseService(params);
-  const updateSet = expenseInstance.getModeledData();
+  const oldExpense = await this.getById(id);
+
+  // build update set with old data if old else new
+  const expenseInstance = new ExpenseService({
+    amount: params.amount || oldExpense.total,
+    tdsAmount: params.tdsAmount || oldExpense.tdsAmount,
+  });
+  const updateSet = {
+    ...params,
+    ...expenseInstance.getModeledData(),
+  };
+  if (!oldExpense) throw new MissingError('Expense does not exist');
 
   // payment crosses amount validation
-  const oldExpense = await this.getById(id);
-  if (!oldExpense) throw new MissingError('Expense does not exist');
-  const paymentAmountDone = Math.round(sumBy(oldExpense.payments, 'amount'));
-  if (updateSet.roundedAmountPayable < paymentAmountDone) throw new Error('Payments cannot exceed the amount');
-  else if (updateSet.roundedAmountPayable > paymentAmountDone) updateSet.status = 'open';
-  else updateSet.status = 'closed';
+  // do not auto-update status if status is explicitly mentioned
+  if (!params.status) {
+    const paymentAmountDone = Math.round(sumBy(oldExpense.payments, 'amount'));
+    if (updateSet.roundedAmountPayable < paymentAmountDone) throw new Error('Payments cannot exceed the amount');
+    else if (updateSet.roundedAmountPayable > paymentAmountDone) updateSet.status = 'open';
+    else updateSet.status = 'closed';
+  }
 
   await this.updateOne({ _id: id }, { $set: updateSet });
   const expense = await this.getById(id);
@@ -117,6 +128,12 @@ ExpenseSchema.statics.createPayment = async function (params) {
   });
   const expense = await this.getById(params.expense);
   return expense;
+};
+
+ExpenseSchema.statics.softDeleteById = async function (id, by) {
+  await this.deleteById(id, by);
+  await PaymentExpense.delete({ _id: id }, by);
+  return { deleted: true };
 };
 
 ExpenseSchema.plugin(mongoosePaginate);
