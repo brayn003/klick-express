@@ -4,8 +4,8 @@ const padStart = require('lodash/padStart');
 const sumBy = require('lodash/sumBy');
 
 const { renderHTML } = require('~helpers/template-service');
-const { renderPDF } = require('~helpers/pdf-service');
 const { uploadBuffer } = require('~helpers/upload-service');
+const { convertToImage, convertToPDF } = require('~helpers/html-convert-service');
 const { ValidationError, MissingError } = require('~helpers/extended-errors');
 const PaymentInvoice = require('~models/Payment/Invoice');
 require('~models/Payment');
@@ -66,6 +66,7 @@ const InvoiceSchema = new mongoose.Schema({
   inlineComment: { type: String, default: null },
   attachments: [{ type: String }],
   fileUrl: { type: String },
+  previewUrl: { type: String },
   particulars: [InvoiceParticularSchema],
 
   discountRate: { type: Number, required: true },
@@ -101,7 +102,8 @@ const InvoiceSchema = new mongoose.Schema({
 InvoiceSchema.statics.createOne = async function (invoiceBody) {
   const invoice = await this.create(invoiceBody);
   const fileUrl = await this.generatePDF(invoice.id);
-  const updatedInvoice = await this.patchOne(invoice.id, { $set: { fileUrl } });
+  const previewUrl = await this.generateImage(invoice.id);
+  const updatedInvoice = await this.patchOne(invoice.id, { $set: { fileUrl, previewUrl } });
   return updatedInvoice;
 };
 
@@ -201,8 +203,15 @@ InvoiceSchema.statics.generateHTML = async function (id) {
 
 InvoiceSchema.statics.generatePDF = async function (id) {
   const html = await this.generateHTML(id);
-  const pdfBuffer = await renderPDF(html, { width: 1190, height: 1684 });
+  const pdfBuffer = await convertToPDF(html, { height: 1684, width: 1190 });
   const url = await uploadBuffer(pdfBuffer, { name: `invoices/${id}`, type: 'application/pdf' });
+  return url;
+};
+
+InvoiceSchema.statics.generateImage = async function (id) {
+  const html = await this.generateHTML(id);
+  const imageStream = await convertToImage(html, { windowSize: { height: 1684, width: 1190 } });
+  const url = await uploadBuffer(imageStream, { name: `invoice-previews/${id}`, type: 'image/jpeg' });
   return url;
 };
 

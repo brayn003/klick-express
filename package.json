@@ -32,6 +32,7 @@
     "mongoose-paginate": "^5.0.3",
     "umzug": "^2.2.0",
     "uuid": "^3.3.2",
+    "webshot": "^0.18.0",
     "yargs": "^13.2.2"
   },
   "devDependencies": {
