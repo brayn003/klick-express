@@ -22,6 +22,7 @@ const routes = [
   'get    /invoices                 invoice/find',
   'post   /invoice                  invoice/create',
   'get    /invoice/:id              invoice/findOne',
+  'patch  /invoice/:id              invoice/update',
   'get    /invoice/:id/view         invoice/view',
   'get    /invoice/:id/sync         invoice/sync',
 

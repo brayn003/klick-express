@@ -8,9 +8,10 @@ const { uploadBuffer } = require('~helpers/upload-service');
 const { convertToImage, convertToPDF } = require('~helpers/html-convert-service');
 const { ValidationError, MissingError } = require('~helpers/extended-errors');
 const PaymentInvoice = require('~models/Payment/Invoice');
-require('~models/Payment');
-// const Particular = require('~models/Particular');
-// const InvoiceService = require('~helpers/invoice-service');
+const Particular = require('~models/Particular');
+const Branch = require('~models/Organization/Branch');
+const Organization = require('~models/Organization');
+const InvoiceService = require('~helpers/invoice-service');
 // const { validateParticulars } = require('~helpers/tax-service');
 // const TaxType = require('~models/TaxType');
 
@@ -99,13 +100,182 @@ const InvoiceSchema = new mongoose.Schema({
   userAudits: true,
 });
 
-InvoiceSchema.statics.createOne = async function (invoiceBody) {
-  const invoice = await this.create(invoiceBody);
+
+InvoiceSchema.statics.createOne = async function (params) {
+  const {
+    organizationBranch: orgBranchId,
+    raisedDate,
+    generateSerial: bodyGenerateSerial = false,
+    currency = 'INR',
+    taxInclusion = 'inclusive',
+    particulars: bodyParticulars,
+    dueDate = null,
+    isUnderLUT = false,
+    client: clientId = null,
+    clientBranch: clientBranchId = null,
+    inlineComment = '',
+    attachements = null,
+    discountRate,
+    discountAmount,
+    tdsRate,
+    tdsAmount,
+    createdBy,
+  } = params;
+
+  const particulars = await Particular.getOrAdd(bodyParticulars);
+  const orgBranch = await Branch.getById(orgBranchId);
+  if (!orgBranch) {
+    throw new Error('Organization branch does not exist');
+  }
+  const organization = await Organization.getById(orgBranch.organization);
+
+  let client = {};
+  let clientBranch = {};
+  if (!clientId && clientBranchId) {
+    clientBranch = await Branch.getById(clientBranchId);
+    client = await Organization.getById(clientBranch.id);
+  } else if ((clientId && !clientBranchId) || (clientId && clientBranchId)) {
+    client = await Organization.getById(clientId);
+    clientBranch = await Branch.getById(client.defaultBranch);
+  }
+
+  let generateSerial = bodyGenerateSerial;
+  if (organization.invoicePreferences.autoSerial) {
+    generateSerial = true;
+  }
+
+  let serial = null;
+  if (generateSerial) {
+    serial = await this.getNewSerial({ organization, branch: orgBranch });
+  }
+
+  const isTaxable = (
+    !!orgBranch.gstNumber
+    && !isUnderLUT
+    && !organization.isUnderComposition
+    && generateSerial
+  );
+
+  const invoiceInstance = new InvoiceService({
+    particulars,
+    isTaxable,
+    isSameState: orgBranch.state === clientBranch.state,
+    taxInclusion,
+    discountAmount,
+    discountRate,
+    tdsRate,
+    tdsAmount,
+  });
+
+  const invoice = await this.create({
+    organization: organization.id,
+    organizationBranch: orgBranchId,
+    client: client.id,
+    clientBranch: clientBranch.id,
+    raisedDate,
+    dueDate,
+    isGSTCompliant: !!orgBranch.gstNumber,
+    isUnderComposition: organization.isUnderComposition,
+    isUnderLUT,
+    currency,
+    taxPerItem: organization.invoicePreferences.taxPerItem,
+    includeQuantity: organization.invoicePreferences.includeQuantity,
+    serial,
+    inlineComment,
+    attachements,
+    createdBy,
+    ...invoiceInstance.getModeledData(),
+  });
   const fileUrl = await this.generatePDF(invoice.id);
   const previewUrl = await this.generateImage(invoice.id);
-  const updatedInvoice = await this.patchOne(invoice.id, { $set: { fileUrl, previewUrl } });
+  await this.updateOne({ _id: invoice.id }, { $set: { fileUrl, previewUrl } });
+  const updatedInvoice = this.getById(invoice.id);
   return updatedInvoice;
 };
+
+// primitive update logic needs to be iterated upon, e.g. amount cannot be smaller that payments
+InvoiceSchema.statics.patchOne = async function (id, params) {
+  const oldInvoice = await this.getById(id);
+  const {
+    organizationBranch: orgBranchId = oldInvoice.organizationBranch,
+    raisedDate = oldInvoice.raisedDate,
+    currency = oldInvoice.currency || 'INR',
+    taxInclusion = oldInvoice.taxInclusion || 'inclusive',
+    particulars: bodyParticulars = oldInvoice.particulars,
+    dueDate = oldInvoice.dueDate || null,
+    isUnderLUT = oldInvoice.isUnderLUT || false,
+    client: clientId = oldInvoice.client || null,
+    clientBranch: clientBranchId = oldInvoice.clientBranch || null,
+    inlineComment = oldInvoice.inlineComment || '',
+    attachements = oldInvoice.attachments || null,
+    discountRate = oldInvoice.discountRate,
+    discountAmount = oldInvoice.discountAmount,
+    tdsRate = oldInvoice.tdsRate,
+    tdsAmount = oldInvoice.tdsAmount,
+    updatedBy,
+  } = params;
+
+  const particulars = await Particular.getOrAdd(bodyParticulars);
+  const orgBranch = await Branch.getById(orgBranchId);
+  if (!orgBranch) {
+    throw new Error('Organization branch does not exist');
+  }
+  const organization = await Organization.getById(orgBranch.organization);
+
+  let client = {};
+  let clientBranch = {};
+  if (!clientId && clientBranchId) {
+    clientBranch = await Branch.getById(clientBranchId);
+    client = await Organization.getById(clientBranch.id);
+  } else if ((clientId && !clientBranchId) || (clientId && clientBranchId)) {
+    client = await Organization.getById(clientId);
+    clientBranch = await Branch.getById(client.defaultBranch);
+  }
+
+  const isTaxable = (
+    !!orgBranch.gstNumber
+    && !isUnderLUT
+    && !organization.isUnderComposition
+    && !!oldInvoice.serial
+  );
+
+  const invoiceInstance = new InvoiceService({
+    particulars,
+    isTaxable,
+    isSameState: orgBranch.state === clientBranch.state,
+    taxInclusion,
+    discountAmount,
+    discountRate,
+    tdsRate,
+    tdsAmount,
+  });
+
+  await this.updateOne({ _id: id }, {
+    organization: organization.id,
+    organizationBranch: orgBranchId,
+    client: client.id,
+    clientBranch: clientBranch.id,
+    raisedDate,
+    dueDate,
+    isGSTCompliant: !!orgBranch.gstNumber,
+    isUnderComposition: organization.isUnderComposition,
+    isUnderLUT,
+    currency,
+    taxPerItem: organization.invoicePreferences.taxPerItem,
+    includeQuantity: organization.invoicePreferences.includeQuantity,
+    inlineComment,
+    attachements,
+    updatedBy,
+    ...invoiceInstance.getModeledData(),
+  });
+
+  const fileUrl = await this.generatePDF(id);
+  const previewUrl = await this.generateImage(id);
+  await this.updateOne({ _id: id }, { fileUrl, previewUrl });
+  const updatedInvoice = await this.getById(id);
+  return updatedInvoice;
+};
+
 
 InvoiceSchema.statics.getById = async function (id) {
   const invoice = await this.findById(id)
@@ -213,12 +383,6 @@ InvoiceSchema.statics.generateImage = async function (id) {
   const imageStream = await convertToImage(html, { windowSize: { height: 1684, width: 1190 } });
   const url = await uploadBuffer(imageStream, { name: `invoice-previews/${id}`, type: 'image/jpeg' });
   return url;
-};
-
-InvoiceSchema.statics.patchOne = async function (id, params) {
-  await this.updateOne({ _id: id }, params);
-  const invoice = await this.findById(id);
-  return invoice;
 };
 
 

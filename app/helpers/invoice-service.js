@@ -228,6 +228,39 @@ class InvoiceService {
   getRoundedAmountReceivable() {
     return Math.round(this.getAmountReceivable());
   }
+
+  getModeledData() {
+    return {
+      isTaxable: this.isTaxable,
+      taxInclusion: this.taxInclusion,
+      particulars: this.particulars.map(particular => ({
+        details: particular.details.id,
+        rate: particular.rate,
+        quantity: particular.quantity,
+        discountRate: this.getParticularDiscountRate(particular),
+        discountAmount: this.getParticularDiscountAmount(particular),
+        taxes: this.getParticularTaxes(particular),
+        overallTaxRate: this.getParticularOverallTaxRate(particular),
+        taxAmount: this.getParticularTaxAmount(particular),
+        amount: this.getParticularAmount(particular),
+        taxableAmount: this.getParticularTaxableAmount(particular),
+        total: this.getParticularTotal(particular),
+      })),
+      discountRate: this.discountRate,
+      discountAmount: this.getInvoiceDiscountAmount(),
+      taxes: this.getOverallTaxes(),
+      overallTaxRate: this.getOverallTaxRate(),
+      taxAmount: this.getTaxAmount(),
+      amount: this.getAmount(),
+      taxableAmount: this.getTaxableAmount(),
+      total: this.getTotal(),
+      tdsRate: this.getTdsRate(),
+      tdsAmount: this.getTdsAmount(),
+      amountReceivable: this.getAmountReceivable(),
+      roundedTotal: this.getRoundedTotal(),
+      roundedAmountReceivable: this.getRoundedAmountReceivable(),
+    };
+  }
 }
 
 module.exports = InvoiceService;
