@@ -201,7 +201,12 @@ InvoiceSchema.statics.patchOne = async function (id, params) {
     raisedDate = oldInvoice.raisedDate,
     currency = oldInvoice.currency || 'INR',
     taxInclusion = oldInvoice.taxInclusion || 'inclusive',
-    particulars: bodyParticulars = oldInvoice.particulars,
+    particulars: bodyParticulars = (oldInvoice.particulars || []).map(p => ({
+      details: p.details._id.toString(),
+      rate: p.rate,
+      quantity: p.quantity,
+      taxes: (p.taxes || []).map(t => ({ taxType: t.taxType._id })),
+    })),
     dueDate = oldInvoice.dueDate || null,
     isUnderLUT = oldInvoice.isUnderLUT || false,
     client: clientId = oldInvoice.client || null,
@@ -213,9 +218,10 @@ InvoiceSchema.statics.patchOne = async function (id, params) {
     tdsRate = oldInvoice.tdsRate,
     tdsAmount = oldInvoice.tdsAmount,
     updatedBy,
+    status = oldInvoice.status,
   } = params;
-
   const particulars = await Particular.getOrAdd(bodyParticulars);
+  // console.log(particulars);
   const orgBranch = await Branch.getById(orgBranchId);
   if (!orgBranch) {
     throw new Error('Organization branch does not exist');
@@ -250,6 +256,15 @@ InvoiceSchema.statics.patchOne = async function (id, params) {
     tdsAmount,
   });
 
+  let newStatus = status;
+  if (!params.status) {
+    const amountReceived = Math.round(sumBy(oldInvoice.payments, 'amount'));
+    const amountReceivable = invoiceInstance.getRoundedAmountReceivable();
+    if (amountReceivable < amountReceived) throw new ValidationError('Amount cannot be smaller than payments');
+    else if (amountReceivable > amountReceived) newStatus = 'open';
+    else newStatus = 'closed';
+  }
+
   await this.updateOne({ _id: id }, {
     organization: organization.id,
     organizationBranch: orgBranchId,
@@ -266,9 +281,9 @@ InvoiceSchema.statics.patchOne = async function (id, params) {
     inlineComment,
     attachments,
     updatedBy,
+    status: newStatus,
     ...invoiceInstance.getModeledData(),
   });
-
   const fileUrl = await this.generatePDF(id);
   const previewUrl = await this.generateImage(id);
   await this.updateOne({ _id: id }, { fileUrl, previewUrl });
