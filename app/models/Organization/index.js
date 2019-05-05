@@ -60,7 +60,7 @@ OrganizationSchema.statics.createOne = async function (params) {
 };
 
 OrganizationSchema.statics.getAll = async function (params) {
-  const { name, user } = params;
+  const { name, user, page = 1 } = params;
   const criteria = {};
   if (name) criteria.name = { $regex: new RegExp(name, 'i') };
   if (user) {
@@ -68,7 +68,10 @@ OrganizationSchema.statics.getAll = async function (params) {
     const organizationIds = roles.map(c => mongoose.Types.ObjectId(c.organization));
     criteria._id = { $in: organizationIds };
   }
-  const organizations = await this.paginate(criteria, { lean: true });
+  const organizations = await this.paginate(criteria, {
+    lean: true,
+    page: parseInt(page, 10),
+  });
   return organizations;
 };
 

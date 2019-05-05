@@ -5,7 +5,7 @@ module.exports = async (req, res) => {
   const { body, user } = req;
   let newBody = body;
   if (!user.admin) {
-    newBody = omit(body, ['verified']);
+    newBody = omit(body, ['verified', 'addUser']);
   }
   const organization = await Organization.createOne({
     ...newBody,
