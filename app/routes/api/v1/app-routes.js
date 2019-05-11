@@ -39,6 +39,9 @@ const routes = [
   'post   /expense                  expense/create',
   'patch  /expense/:id              expense/update',
 
+  // dashboard
+  'get    /dashboard/expense-category-pie   dashboard/expenseCategoryPie',
+
 
   // upload
   'get    /upload/signed-url        upload/getSignedUrl',

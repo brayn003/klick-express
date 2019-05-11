@@ -29,6 +29,7 @@ async function up(con) {
     ex.taxes = [];
     ex.tdsAmount = oldEx.tdsAmount;
     ex.tdsRate = (oldEx.tdsAmount / oldEx.amountAfterTax) * 100;
+    ex.amountPayable = oldEx.amountPayable;
     ex.roundedTotal = Math.round(oldEx.amountAfterTax);
     ex.roundedAmountPayable = Math.round(oldEx.amountPayable);
     ex.status = oldEx.paymentDate ? 'closed' : 'open';
