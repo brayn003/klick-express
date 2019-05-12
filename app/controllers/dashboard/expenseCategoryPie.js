@@ -8,6 +8,9 @@ const controller = async (req, res) => {
   if (!user.admin && !query.organization) {
     throw new ForbiddenError('You don\'t have access to access all invoices');
   }
+  const now = new Date();
+  const month = parseInt(query.month, 10) || now.getMonth() + 1;
+  const year = parseInt(query.year, 10) || now.getFullYear();
   const $match = {};
   try {
     if (query.organization) $match.organization = mongoose.Types.ObjectId(query.organization);
@@ -19,18 +22,20 @@ const controller = async (req, res) => {
     const aggExpense = await Expense.aggregate([
       { $match },
       {
+        $project: {
+          category: '$category',
+          month: { $month: '$expenseDate' },
+          year: { $year: '$expenseDate' },
+          inOther: { $lt: [{ $multiply: [{ $divide: ['$amountPayable', totalExpense] }, 100] }, 3] },
+          amountPayable: '$amountPayable',
+        },
+      },
+      { $match: { month, year } },
+      {
         $group: {
           _id: '$category',
           category: { $first: '$category' },
           total: { $sum: '$amountPayable' },
-        },
-      },
-      {
-        $project: {
-          _id: '$category',
-          category: '$category',
-          percent: { $multiply: [{ $divide: ['$total', totalExpense] }, 100] },
-          total: '$total',
         },
       },
     ]);
@@ -43,8 +48,9 @@ const controller = async (req, res) => {
     return res.json({
       data,
       labelKey: 'Name',
-      valuekey: 'Amount',
-      percentKey: 'Percent',
+      valueKey: 'Amount',
+      month: parseInt(month, 10),
+      year: parseInt(year, 10),
     });
   } catch (err) {
     throw new ValidationError(err.errmsg);
