@@ -14,6 +14,8 @@ const routes = [
   'get    /organizations            organization/find',
   'get    /organization/:id         organization/findOne',
   'post   /organization             organization/create',
+  'delete /organization/:id         organization/deleteOne',
+  'patch  /organization/:id         organization/update',
 
   // payment invoice
   'post   /invoice/payment          payment-invoice/create',

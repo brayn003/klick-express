@@ -49,7 +49,7 @@ OrganizationSchema.statics.createOne = async function (params) {
     role: 'owner',
   });
   const branch = await Branch.createOne({
-    name: 'DEFAULT BRANCH',
+    name: 'Default Branch',
     organization: organization.id,
     createdBy: params.createdBy,
   });
@@ -80,6 +80,12 @@ OrganizationSchema.statics.getById = async function (id) {
     .populate('defaultBranch')
     .populate('createdBy');
   return organization;
+};
+
+
+OrganizationSchema.statics.patchOne = async function (id, details) {
+  await this.findByIdAndUpdate(id, details);
+  return this.findById(id);
 };
 
 OrganizationSchema.pre('save', function (next) {

@@ -353,13 +353,15 @@ InvoiceSchema.statics.createPayment = async function (params) {
 };
 
 InvoiceSchema.statics.getNewSerial = async function (params) {
-  const { organization, branch } = params;
+  // const { organization, branch } = params;
+  const { organization } = params;
   const count = await this.count({
     organization: organization.id,
-    organizationBranch: branch.id,
+    // organizationBranch: branch.id,
     serial: { $ne: null },
   }).sort('-createdAt');
-  return `${organization.code}/${branch.code}/${padStart(count + 1, 6, 0)}`;
+  // return `${organization.code}/${branch.code}/${padStart(count + 1, 6, 0)}`;
+  return `${organization.code}-${padStart(count + 1, 6, 0)}`;
 };
 
 InvoiceSchema.statics.generateHTML = async function (id) {
