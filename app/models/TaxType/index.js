@@ -29,7 +29,7 @@ TaxTypeSchema.statics.getAll = async function (params) {
   const { name, ...rest } = params;
   const criteria = { ...rest };
   if (name) criteria.name = { $regex: new RegExp(name, 'i') };
-  const taxTypes = await this.paginate(criteria, { lean: true });
+  const taxTypes = await this.find(criteria);
   return taxTypes;
 };
 

@@ -8,6 +8,24 @@ const taxSeed = [
     config: { isSameState: true, isSameUt: true },
   },
   {
+    type: 'cgst_0.05',
+    rate: 0.05,
+    name: 'CGST @0.05%',
+    config: { isSameState: true, isSameUt: true },
+  },
+  {
+    type: 'cgst_0.125',
+    rate: 0.125,
+    name: 'CGST @0.125%',
+    config: { isSameState: true, isSameUt: true },
+  },
+  {
+    type: 'cgst_1.5',
+    rate: 1.5,
+    name: 'CGST @1.5%',
+    config: { isSameState: true, isSameUt: true },
+  },
+  {
     type: 'cgst_2.5',
     rate: 2.5,
     name: 'CGST @2.5%',
@@ -38,6 +56,24 @@ const taxSeed = [
     config: { isSameState: true },
   },
   {
+    type: 'sgst_0.05',
+    rate: 0.05,
+    name: 'SGST @0.05%',
+    config: { isSameState: true },
+  },
+  {
+    type: 'sgst_0.125',
+    rate: 0.125,
+    name: 'SGST @0.125%',
+    config: { isSameState: true },
+  },
+  {
+    type: 'sgst_1.5',
+    rate: 1.5,
+    name: 'SGST @1.5%',
+    config: { isSameState: true },
+  },
+  {
     type: 'sgst_2.5',
     rate: 2.5,
     name: 'SGST @2.5%',
@@ -65,6 +101,24 @@ const taxSeed = [
     type: 'igst_0',
     rate: 0,
     name: 'IGST @0%',
+    config: { isSameState: false },
+  },
+  {
+    type: 'igst_0.1',
+    rate: 0.1,
+    name: 'IGST @0.1%',
+    config: { isSameState: false },
+  },
+  {
+    type: 'igst_0.25',
+    rate: 0.25,
+    name: 'IGST @0.25%',
+    config: { isSameState: false },
+  },
+  {
+    type: 'igst_3',
+    rate: 3,
+    name: 'IGST @3%',
     config: { isSameState: false },
   },
   {
