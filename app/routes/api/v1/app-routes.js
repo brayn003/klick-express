@@ -44,6 +44,7 @@ const routes = [
   // dashboard
   'get    /dashboard/expense-category-pie   dashboard/expenseCategoryPie',
   'get    /dashboard/cashflow-bar           dashboard/cashflowBar',
+  'get    /dashboard/invoice-value          dashboard/invoiceValue',
 
 
   // upload

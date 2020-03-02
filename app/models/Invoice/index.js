@@ -82,7 +82,7 @@ const InvoiceSchema = new mongoose.Schema({
 
   // amount before discounts/commissions and taxes
   amount: { type: Number, required: true },
-  // amount before discounts/commissions, on which tax needs to applied
+  // amount after discounts/commissions, on which tax needs to applied
   taxableAmount: { type: Number, required: true },
   // grand total after discount and commission
   total: { type: Number, required: true },
