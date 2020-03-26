@@ -11,6 +11,7 @@ const OrganizationSchema = new mongoose.Schema({
   logo: { type: String, default: null },
   signature: { type: String, default: null },
   verified: { type: Boolean, default: false },
+  referrer: { type: 'ObjectId', ref: 'Organization' },
   defaultBranch: { type: 'ObjectId', ref: 'OrganizationBranch' },
   code: { type: String, minlength: 2, maxlength: 4 },
 
@@ -60,8 +61,12 @@ OrganizationSchema.statics.createOne = async function (params) {
 };
 
 OrganizationSchema.statics.getAll = async function (params) {
-  const { name, user, page = 1 } = params;
+  const {
+    name, user, referrer, verified, page = 1,
+  } = params;
   const criteria = {};
+  if (referrer) criteria.referrer = referrer;
+  if (verified) criteria.verified = verified;
   if (name) criteria.name = { $regex: new RegExp(name, 'i') };
   if (user) {
     const roles = await OrganizationUser.find({ user });
@@ -69,6 +74,12 @@ OrganizationSchema.statics.getAll = async function (params) {
     criteria._id = { $in: organizationIds };
   }
   const organizations = await this.paginate(criteria, {
+    populate: {
+      path: 'defaultBranch',
+      populate: {
+        path: 'state',
+      },
+    },
     lean: true,
     page: parseInt(page, 10),
   });

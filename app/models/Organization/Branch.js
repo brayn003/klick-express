@@ -50,6 +50,7 @@ BranchSchema.statics.createOne = async function (params) {
 BranchSchema.statics.patchOne = async function (id, params) {
   await this.updateOne({ _id: id }, { $set: params });
   const branch = await this.getById(id);
+  console.log('branch', id, params);
   return branch;
 };
 
