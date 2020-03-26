@@ -43,7 +43,7 @@ async function up(con) {
     const newBranch = { ...convertMeta(oldOrg) };
     newBranch.updatedAt = null;
     newBranch.organization = oldOrg._id;
-    newBranch.name = 'DEFAULT BRANCH';
+    newBranch.name = 'Home Branch';
     newBranch.code = 'B1';
     newBranch.addressLineOne = oldOrg.address;
     newBranch.addressLineTwo = '';

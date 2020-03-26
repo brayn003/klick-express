@@ -49,7 +49,7 @@ OrganizationSchema.statics.createOne = async function (params) {
     role: 'owner',
   });
   const branch = await Branch.createOne({
-    name: 'Default Branch',
+    name: 'Home Branch',
     organization: organization.id,
     createdBy: params.createdBy,
   });

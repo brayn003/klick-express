@@ -5,8 +5,12 @@ const routes = [
   'get    /users                    user/find',
   'get    /user/me                  user/me',
 
+  // location
+  'get    /location/states          location-state/find',
+
   // organization branches
   'get    /organization/branches    organization-branch/find',
+  'get    /organization/branch/:id  organization-branch/findOne',
   'post   /organization/branch      organization-branch/create',
   'patch  /organization/branch/:id  organization-branch/update',
 

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
-require('~models/Location');
+const { ValidationError } = require('~helpers/extended-errors');
 
 const BranchSchema = new mongoose.Schema({
   organization: { type: 'ObjectId', ref: 'Organization', required: true },
@@ -34,12 +34,16 @@ BranchSchema.statics.getAll = async function (params) {
   const criteria = {};
   if (name) criteria.name = { $regex: new RegExp(name, 'i') };
   if (organization) criteria.organization = organization;
-  const branches = await this.paginate(criteria, { lean: true });
+  const branches = await this.paginate(criteria, { lean: true, populate: ['state', 'city', 'organization'] });
   return branches;
 };
 
 BranchSchema.statics.createOne = async function (params) {
-  const branch = await this.create(params);
+  if (!params.organization) {
+    throw new ValidationError('Organization needs to be mentioned');
+  }
+  const branchCount = await this.count({ organization: params.organization });
+  const branch = await this.create({ ...params, code: `B${branchCount + 1}` });
   return branch;
 };
 
@@ -49,10 +53,10 @@ BranchSchema.statics.patchOne = async function (id, params) {
   return branch;
 };
 
-BranchSchema.pre('save', async function (next) {
-  this.code = this.name.substring(0, 3).toUpperCase();
-  return next();
-});
+// BranchSchema.pre('save', async function (next) {
+//   this.code = this.name.substring(0, 3).toUpperCase();
+//   return next();
+// });
 
 BranchSchema.plugin(mongoosePaginate);
 
