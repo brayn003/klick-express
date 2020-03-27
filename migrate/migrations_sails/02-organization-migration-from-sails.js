@@ -18,14 +18,14 @@ async function up(con) {
   oldOrgs.forEach((oldOrg) => {
     const newOrg = { ...convertMeta(oldOrg) };
     newOrg._id = oldOrg._id;
-    newOrg.name = oldOrg.name;
-    newOrg.pan = oldOrg.panNumber;
-    newOrg.phone = oldOrg.phone;
-    newOrg.email = oldOrg.email;
+    newOrg.name = oldOrg.name.trim();
+    newOrg.pan = (oldOrg.panNumber || '').replace(/[ ]/g, '');
+    newOrg.phone = `+91${(oldOrg.phone || '').replace(/(\+91)/g, '').replace(/[ ]/g, '')}`;
+    newOrg.email = (oldOrg.email || '').replace(/[ ]/g, '');
     newOrg.logo = oldOrg.logo;
     newOrg.verified = true;
     newOrg.signature = oldOrg.signature;
-    newOrg.code = oldOrg.invoiceSerialPrefix;
+    newOrg.code = oldOrg.invoiceSerialPrefix.replace(/[ ]/g, '');
     newOrg.industryType = oldOrg.type;
     newOrg.isUnderComposition = oldOrg.isUnderComposition;
     newOrg.invoicePreferences = {};
@@ -57,8 +57,8 @@ async function up(con) {
     newBank.organization = oldOrg._id;
     newBank.bankName = oldOrg.bankName;
     newBank.beneficiaryName = oldOrg.bankBeneficiaryName;
-    newBank.accountNumber = oldOrg.bankAccountNumber;
-    newBank.ifsc = oldOrg.bankIFSC;
+    newBank.accountNumber = (oldOrg.bankAccountNumber || '').replace(/[ ]/g, '');
+    newBank.ifsc = (oldOrg.bankIFSC || '').replace(/[ ]/g, '');
     newBank.accountType = oldOrg.bankAccountType;
 
     bulkOrg.find({ _id: oldOrg._id }).replaceOne(newOrg);

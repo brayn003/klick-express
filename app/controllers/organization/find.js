@@ -8,7 +8,6 @@ module.exports = async (req, res) => {
   // if (!user.admin && query.user !== user.id) {
   //   throw new Error('User token mismatch');
   // }
-  console.log(query);
   const organizations = await Organization.getAll(query);
   return res.status(200).json(organizations);
 };
