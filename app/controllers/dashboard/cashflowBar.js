@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
 const Invoice = require('~models/Invoice');
-const Expense = require('~models/Expense');
+// const Expense = require('~models/Expense');
 const { ForbiddenError, ValidationError } = require('~helpers/extended-errors');
+const sortBy = require('lodash/sortBy');
 
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -32,7 +33,7 @@ const controller = async (req, res) => {
   const $match = {};
   if (query.organization) $match.organization = mongoose.Types.ObjectId(query.organization);
   let aggIncoming = [];
-  let aggOutgoing = [];
+  // let aggOutgoing = [];
   try {
     aggIncoming = await Invoice.aggregate([
       { $match },
@@ -66,80 +67,80 @@ const controller = async (req, res) => {
         },
       },
     ]);
-    aggOutgoing = await Expense.aggregate([
-      { $match },
-      {
-        $lookup: {
-          from: 'payment',
-          localField: '_id',
-          foreignField: 'invoice',
-          as: 'payments',
-        },
-      },
-      {
-        $project: {
-          month: { $month: '$expenseDate' },
-          year: { $year: '$expenseDate' },
-          paid: { $sum: '$payments.amount' },
-          remaining: { $subtract: ['$roundedAmountPayable', { $sum: '$payments.amount' }] },
-          total: '$roundedAmountPayable',
-        },
-      },
-      { $match: { $or: expectedPeriods } },
-      {
-        $group: {
-          _id: {
-            month: '$month',
-            year: '$year',
-          },
-          paid: { $sum: '$paid' },
-          remaining: { $sum: '$remaining' },
-          total: { $sum: '$total' },
-        },
-      },
-    ]);
+    // aggOutgoing = await Expense.aggregate([
+    //   { $match },
+    //   {
+    //     $lookup: {
+    //       from: 'payment',
+    //       localField: '_id',
+    //       foreignField: 'invoice',
+    //       as: 'payments',
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       month: { $month: '$expenseDate' },
+    //       year: { $year: '$expenseDate' },
+    //       paid: { $sum: '$payments.amount' },
+    //       remaining: { $subtract: ['$roundedAmountPayable', { $sum: '$payments.amount' }] },
+    //       total: '$roundedAmountPayable',
+    //     },
+    //   },
+    //   { $match: { $or: expectedPeriods } },
+    //   {
+    //     $group: {
+    //       _id: {
+    //         month: '$month',
+    //         year: '$year',
+    //       },
+    //       paid: { $sum: '$paid' },
+    //       remaining: { $sum: '$remaining' },
+    //       total: { $sum: '$total' },
+    //     },
+    //   },
+    // ]);
   } catch (err) {
     throw new ValidationError(err.errmsg);
   }
 
-
-  const data = [];
+  // const data = aggIncoming;
+  const unsortedData = [];
   aggIncoming.reduce((agg, inc) => {
-    const { _id, remaining, received } = inc;
+    const { _id, total } = inc;
     agg.push({
       Month: `${months[_id.month - 1]} ${_id.year}`,
       // Year: _id.year,
-      Type: 'Income',
-      Status: 'Pending',
-      Amount: remaining,
+      // Type: 'Income',
+      // Status: 'Pending',
+      Amount: total,
     });
-    agg.push({
-      Month: `${months[_id.month - 1]} ${_id.year}`,
-      // Year: _id.year,
-      Type: 'Income',
-      Status: 'Confirmed',
-      Amount: received,
-    });
+    // agg.push({
+    //   Month: `${months[_id.month - 1]} ${_id.year}`,
+    //   // Year: _id.year,
+    //   Type: 'Income',
+    //   Status: 'Confirmed',
+    //   Amount: received,
+    // });
     return agg;
-  }, data);
-  aggOutgoing.reduce((agg, out) => {
-    const { _id, remaining, paid } = out;
-    agg.push({
-      Month: `${months[_id.month - 1]} ${_id.year}`,
-      // Year: _id.year,
-      Type: 'Expense',
-      Status: 'Pending',
-      Amount: remaining,
-    });
-    agg.push({
-      Month: `${months[_id.month - 1]} ${_id.year}`,
-      // Year: _id.year,
-      Type: 'Expense',
-      Status: 'Confirmed',
-      Amount: paid,
-    });
-    return agg;
-  }, data);
+  }, unsortedData);
+  // aggOutgoing.reduce((agg, out) => {
+  //   const { _id, remaining, paid } = out;
+  //   agg.push({
+  //     Month: `${months[_id.month - 1]} ${_id.year}`,
+  //     // Year: _id.year,
+  //     Type: 'Expense',
+  //     Status: 'Pending',
+  //     Amount: remaining,
+  //   });
+  //   agg.push({
+  //     Month: `${months[_id.month - 1]} ${_id.year}`,
+  //     // Year: _id.year,
+  //     Type: 'Expense',
+  //     Status: 'Confirmed',
+  //     Amount: paid,
+  //   });
+  //   return agg;
+  // }, data);
 
   // FUCKED UP CODE
   // const data = aggIncoming;
@@ -151,14 +152,18 @@ const controller = async (req, res) => {
   //   Month: `${months[inc.month - 1]} ${inc.year}`,
   //   // Amount: inc.
   // }));
+  const data = sortBy(
+    unsortedData,
+    ({ Month }) => (Month.substring(4, Month.length) * 100) + months.indexOf(Month.substring(0, 3)),
+  );
 
   return res.status(200).json({
     month,
     year,
     valueKey: 'Amount',
     labelKey: 'Month',
-    groupBy: 'Type',
-    stackBy: 'Status',
+    // groupBy: 'Type',
+    // stackBy: 'Status',
     data,
   });
 };

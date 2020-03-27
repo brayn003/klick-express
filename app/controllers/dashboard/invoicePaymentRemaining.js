@@ -1,8 +1,6 @@
-
-
 const { ForbiddenError } = require('~helpers/extended-errors');
 const Invoice = require('~models/Invoice');
-
+const mongoose = require('mongoose');
 
 const controller = async (req, res) => {
   const { query, user } = req;
@@ -14,7 +12,10 @@ const controller = async (req, res) => {
     status: { $in: ['open', 'closed'] },
     // data from 1 April 2019
     raisedDate: { $gte: new Date(1554057000000) },
+    organization: query.organization,
   };
+
+  if (query.organization) $match.organization = mongoose.Types.ObjectId(query.organization);
 
   const summary = await Invoice.aggregate([
     { $match },
@@ -57,15 +58,22 @@ const controller = async (req, res) => {
     },
     {
       $group: {
-        _id: '$client._id',
-        client: { $first: '$client' },
+        _id: null,
         received: { $sum: '$received' },
         remaining: { $sum: '$remaining' },
         total: { $sum: '$total' },
       },
     },
+    {
+      $project: {
+        _id: 0,
+        received: 1,
+        remaining: 1,
+        total: 1,
+      },
+    },
   ]);
-  res.json(summary);
+  res.json(summary[0]);
 };
 
 module.exports = controller;

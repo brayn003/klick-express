@@ -46,10 +46,10 @@ const routes = [
   'patch  /expense/:id              expense/update',
 
   // dashboard
-  'get    /dashboard/expense-category-pie   dashboard/expenseCategoryPie',
-  'get    /dashboard/cashflow-bar           dashboard/cashflowBar',
-  'get    /dashboard/invoice-value          dashboard/invoiceValue',
-  'get    /dashboard/client-value-table     dashboard/clientValueTable',
+  'get    /dashboard/expense-category-pie           dashboard/expenseCategoryPie',
+  'get    /dashboard/cashflow-bar                   dashboard/cashflowBar',
+  'get    /dashboard/invoice-value                  dashboard/invoiceValue',
+  'get    /dashboard/invoice-payment-remaining      dashboard/invoicePaymentRemaining',
 
 
   // upload
